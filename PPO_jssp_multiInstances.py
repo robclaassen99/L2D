@@ -294,7 +294,7 @@ def main():
             vali_result = - validate(vali_data, ppo.policy).mean()
             validation_log.append(vali_result)
             if vali_result < record:
-                torch.save(ppo.policy.state_dict(), './SavedNetwork/{}.pth'.format(
+                torch.save(ppo.policy.state_dict(), './SavedNetworkNew/{}.pth'.format(
                     str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t) + '_' + str(configs.low) + '_'
                     + str(configs.high) + '_' + str(configs.lt_low) + '_' + str(configs.lt_high)))
                 record = vali_result
