@@ -6,18 +6,19 @@ import time
 
 n_j = 3
 n_m = 3
+n_t = 2
 low = 1
-high = 99
+high = 50
 lt_low = 1
-lt_high = 99
+lt_high = 50
 SEED = 11
 np.random.seed(SEED)
-env = SJSSP(n_j=n_j, n_m=n_m)
+env = SJSSP(n_j=n_j, n_m=n_m, n_t=n_t)
 
 
 # rollout env random action
 t1 = time.time()
-data = uni_instance_gen(n_j=n_j, n_m=n_m, low=low, high=high, lt_low=lt_low, lt_high=lt_high)
+data = uni_instance_gen(n_j=n_j, n_m=n_m, n_t=n_t, low=low, high=high, lt_low=lt_low, lt_high=lt_high)
 dur = np.array([[83, 65,  3],
                [69, 42, 64],
                [27, 27, 18]])
@@ -30,6 +31,8 @@ print(data[0])
 print('LT')
 print(data[1])
 print('Mach')
+print(data[2])
+print('Trucks')
 print(data[-1])
 print()
 _, _, omega, mask = env.reset(data)
@@ -39,18 +42,18 @@ _, _, omega, mask = env.reset(data)
 rewards = [- env.initQuality]
 while True:
     action = np.random.choice(omega[~mask])
-    # print('action:', action)
+    print('action:', action)
     adj, _, reward, done, omega, mask = env.step(action)
     rewards.append(reward)
-    # print('ET after action:\n', env.LBs)
+    print('ET after action:\n', env.LBs)
     # print(fea)
     # print()
     if env.done():
         break
 t2 = time.time()
 makespan = sum(rewards) - env.posRewards
-# print(makespan)
-# print(env.LBs)
+print(makespan)
+print(env.LBs)
 print(t2 - t1)
 # np.save('sol', env.opIDsOnMchs // n_m)
 # np.save('jobSequence', env.opIDsOnMchs)

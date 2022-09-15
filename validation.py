@@ -1,6 +1,7 @@
 def validate(vali_set, model):
-    N_JOBS = vali_set[0][0].shape[0]
+    N_JOBS = vali_set[0][-1].shape[0]
     N_MACHINES = vali_set[0][0].shape[1]
+    N_TRUCKS = vali_set[0][0].shape[0] - N_MACHINES
 
     from JSSP_Env import SJSSP
     from mb_agg import g_pool_cal
@@ -9,7 +10,7 @@ def validate(vali_set, model):
     import numpy as np
     import torch
     from Params import configs
-    env = SJSSP(n_j=N_JOBS, n_m=N_MACHINES)
+    env = SJSSP(n_j=N_JOBS, n_m=N_MACHINES, n_t=N_TRUCKS)
     device = torch.device(configs.device)
     g_pool_step = g_pool_cal(graph_pool_type=configs.graph_pool_type,
                              batch_size=torch.Size([1, env.number_of_tasks, env.number_of_tasks]),
@@ -52,26 +53,30 @@ if __name__ == '__main__':
     from Params import configs
 
     parser = argparse.ArgumentParser(description='Arguments for ppo_jssp')
-    parser.add_argument('--Pn_j', type=int, default=20, help='Number of jobs of instances to test')
-    parser.add_argument('--Pn_m', type=int, default=15, help='Number of machines instances to test')
-    parser.add_argument('--Nn_j', type=int, default=20, help='Number of jobs on which to be loaded net are trained')
-    parser.add_argument('--Nn_m', type=int, default=15, help='Number of machines on which to be loaded net are trained')
+    parser.add_argument('--Pn_j', type=int, default=6, help='Number of jobs of instances to test')
+    parser.add_argument('--Pn_m', type=int, default=6, help='Number of machines instances to test')
+    parser.add_argument('--Pn_t', type=int, default=2, help='Number of trucks instances to test')
+    parser.add_argument('--Nn_j', type=int, default=6, help='Number of jobs on which to be loaded net are trained')
+    parser.add_argument('--Nn_m', type=int, default=6, help='Number of machines on which to be loaded net are trained')
+    parser.add_argument('--Nn_t', type=int, default=2, help='Number of trucks on which to be loaded net are trained')
     parser.add_argument('--low', type=int, default=1, help='LB of duration')
-    parser.add_argument('--high', type=int, default=99, help='UB of duration')
+    parser.add_argument('--high', type=int, default=50, help='UB of duration')
     parser.add_argument('--lt_low', type=int, default=1, help='LB of lead time')
-    parser.add_argument('--lt_high', type=int, default=99, help='UB of lead time')
+    parser.add_argument('--lt_high', type=int, default=50, help='UB of lead time')
     parser.add_argument('--seed', type=int, default=200, help='Cap seed for validate set generation')
     parser.add_argument('--n_vali', type=int, default=100, help='validation set size')
     params = parser.parse_args()
 
     N_JOBS_P = params.Pn_j
     N_MACHINES_P = params.Pn_m
+    N_TRUCKS_P = params.Pn_t
     LOW = params.low
     HIGH = params.high
     LT_LOW = params.lt_low
     LT_HIGH = params.lt_high
     N_JOBS_N = params.Nn_j
     N_MACHINES_N = params.Nn_m
+    N_TRUCKS_N = params.Nn_t
 
     from PPO_jssp_multiInstances import PPO
     import torch
@@ -89,8 +94,8 @@ if __name__ == '__main__':
               num_mlp_layers_critic=configs.num_mlp_layers_critic,
               hidden_dim_critic=configs.hidden_dim_critic)
 
-    path = './SavedNetwork/LT_{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(LOW) + '_' + str(HIGH)
-                                             + '_' + str(LT_LOW) + '_' + str(LT_HIGH))
+    path = './SavedNetwork/LT_Truck_{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(N_TRUCKS_N) + '_'
+                                                   + str(LOW) + '_' + str(HIGH) + '_' + str(LT_LOW) + '_' + str(LT_HIGH))
     ppo.policy.load_state_dict(torch.load(path))
 
     SEEDs = range(0, params.seed, 10)
@@ -99,7 +104,8 @@ if __name__ == '__main__':
 
         np.random.seed(SEED)
 
-        vali_data = [uni_instance_gen(n_j=N_JOBS_P, n_m=N_MACHINES_P, low=LOW, high=HIGH, lt_low=LT_LOW, lt_high=LT_HIGH) for _ in range(params.n_vali)]
+        vali_data = [uni_instance_gen(n_j=N_JOBS_P, n_m=N_MACHINES_P, n_t=N_TRUCKS_P, low=LOW, high=HIGH, lt_low=LT_LOW,
+                                      lt_high=LT_HIGH) for _ in range(params.n_vali)]
 
         makespan = - validate(vali_data, ppo.policy)
         print(makespan.mean())

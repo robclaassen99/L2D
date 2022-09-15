@@ -6,6 +6,7 @@ parser.add_argument('--device', type=str, default="cuda", help='Number of jobs o
 # args for env
 parser.add_argument('--n_j', type=int, default=6, help='Number of jobs of instance')
 parser.add_argument('--n_m', type=int, default=6, help='Number of machines instance')
+parser.add_argument('--n_t', type=int, default=2, help='Number of trucks of instance, i.e. number of loading operations')
 parser.add_argument('--rewardscale', type=float, default=0., help='Reward scale for positive rewards')
 parser.add_argument('--init_quality_flag', type=bool, default=False, help='Flag of whether init state quality is 0, True for 0')
 parser.add_argument('--low', type=int, default=1, help='LB of duration')

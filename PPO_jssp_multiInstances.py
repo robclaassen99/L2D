@@ -43,6 +43,7 @@ class PPO:
                  eps_clip,
                  n_j,
                  n_m,
+                 n_t,
                  num_layers,
                  neighbor_pooling_type,
                  input_dim,
@@ -60,6 +61,7 @@ class PPO:
 
         self.policy = ActorCritic(n_j=n_j,
                                   n_m=n_m,
+                                  n_t=n_t,
                                   num_layers=num_layers,
                                   learn_eps=False,
                                   neighbor_pooling_type=neighbor_pooling_type,
@@ -158,15 +160,20 @@ class PPO:
 def main():
 
     from JSSP_Env import SJSSP
-    envs = [SJSSP(n_j=configs.n_j, n_m=configs.n_m) for _ in range(configs.num_envs)]
+    envs = [SJSSP(n_j=configs.n_j, n_m=configs.n_m, n_t=configs.n_t) for _ in range(configs.num_envs)]
     
     from uniform_instance_gen import uni_instance_gen
     data_generator = uni_instance_gen
 
-    dataLoaded = np.load('./DataGen/generatedDataLT' + str(configs.n_j) + '_' + str(configs.n_m) + '_Seed' + str(configs.np_seed_validation) + '.npy')
+    dataLoaded = np.load(
+        './DataGen/generatedDataLTTruck' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+        + '_Seed' + str(configs.np_seed_validation) + '.npy')
+    arrayLoaded = np.load(
+        './DataGen/generatedArrayLTTruck' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+        + '_Seed' + str(configs.np_seed_validation) + '.npy')
     vali_data = []
     for i in range(dataLoaded.shape[0]):
-        vali_data.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2]))
+        vali_data.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2], arrayLoaded[i]))
 
     torch.manual_seed(configs.torch_seed)
     if torch.cuda.is_available():
@@ -178,6 +185,7 @@ def main():
     ppo = PPO(configs.lr, configs.gamma, configs.k_epochs, configs.eps_clip,
               n_j=configs.n_j,
               n_m=configs.n_m,
+              n_t=configs.n_t,
               num_layers=configs.num_layers,
               neighbor_pooling_type=configs.neighbor_pooling_type,
               input_dim=configs.input_dim,
@@ -188,9 +196,10 @@ def main():
               num_mlp_layers_critic=configs.num_mlp_layers_critic,
               hidden_dim_critic=configs.hidden_dim_critic)
 
+    n_nodes = configs.n_j * (configs.n_m - 1) + configs.n_t
     g_pool_step = g_pool_cal(graph_pool_type=configs.graph_pool_type,
-                             batch_size=torch.Size([1, configs.n_j*configs.n_m, configs.n_j*configs.n_m]),
-                             n_nodes=configs.n_j*configs.n_m,
+                             batch_size=torch.Size([1, n_nodes, n_nodes]),
+                             n_nodes=n_nodes,
                              device=device)
     # training loop
     log = []
@@ -209,7 +218,7 @@ def main():
         mask_envs = []
         
         for i, env in enumerate(envs):
-            adj, fea, candidate, mask = env.reset(data_generator(n_j=configs.n_j, n_m=configs.n_m,
+            adj, fea, candidate, mask = env.reset(data_generator(n_j=configs.n_j, n_m=configs.n_m, n_t=configs.n_t,
                                                                  low=configs.low, high=configs.high,
                                                                  lt_low=configs.lt_low, lt_high=configs.lt_high))
             adj_envs.append(adj)
@@ -263,15 +272,16 @@ def main():
         for j in range(configs.num_envs):
             ep_rewards[j] -= envs[j].posRewards
 
-        loss, v_loss = ppo.update(memories, configs.n_j*configs.n_m, configs.graph_pool_type)
+        loss, v_loss = ppo.update(memories, n_nodes, configs.graph_pool_type)
         for memory in memories:
             memory.clear_memory()
         mean_rewards_all_env = sum(ep_rewards) / len(ep_rewards)
         log.append([i_update, mean_rewards_all_env])
         if (i_update + 1) % 100 == 0:
             file_writing_obj = open(
-                './run_results/logs/' + 'log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low)
-                + '_' + str(configs.high) + '_' + str(configs.lt_low) + '_' + str(configs.lt_high) + '.txt', 'w')
+                './run_results/logs/' + 'log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+                + '_' + str(configs.low) + '_' + str(configs.high) + '_' + str(configs.lt_low) + '_'
+                + str(configs.lt_high) + '.txt', 'w')
             file_writing_obj.write(str(log))
 
         # log results
@@ -285,13 +295,14 @@ def main():
             validation_log.append(vali_result)
             if vali_result < record:
                 torch.save(ppo.policy.state_dict(), './SavedNetwork/{}.pth'.format(
-                    str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high)
-                    + '_' + str(configs.lt_low) + '_' + str(configs.lt_high)))
+                    str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t) + '_' + str(configs.low) + '_'
+                    + str(configs.high) + '_' + str(configs.lt_low) + '_' + str(configs.lt_high)))
                 record = vali_result
             print('The validation quality is:', vali_result)
             file_writing_obj1 = open(
-                './run_results/valis/' + 'vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low)
-                + '_' + str(configs.high) + '_' + str(configs.lt_low) + '_' + str(configs.lt_high) + '.txt', 'w')
+                './run_results/valis/' + 'vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+                + '_' + str(configs.low) + '_' + str(configs.high) + '_' + str(configs.lt_low)
+                + '_' + str(configs.lt_high) + '.txt', 'w')
             file_writing_obj1.write(str(validation_log))
         t5 = time.time()
 

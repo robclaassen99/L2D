@@ -10,6 +10,7 @@ class ActorCritic(nn.Module):
     def __init__(self,
                  n_j,
                  n_m,
+                 n_t,
                  # feature extraction net unique attributes:
                  num_layers,
                  learn_eps,
@@ -32,7 +33,8 @@ class ActorCritic(nn.Module):
         self.n_j = n_j
         # machine size for problems, no business with network
         self.n_m = n_m
-        self.n_ops_perjob = n_m
+        self.n_t = n_t
+        # self.n_ops_perjob = n_m
         self.device = device
 
         self.feature_extract = GraphCNN(num_layers=num_layers,
@@ -59,7 +61,7 @@ class ActorCritic(nn.Module):
                                                  padded_nei=padded_nei,
                                                  adj=adj)
         # prepare policy feature: concat omega feature with global feature
-        dummy = candidate.unsqueeze(-1).expand(-1, self.n_j, h_nodes.size(-1))
+        dummy = candidate.unsqueeze(-1).expand(-1, self.n_j + self.n_t, h_nodes.size(-1))
         candidate_feature = torch.gather(h_nodes.reshape(dummy.size(0), -1, dummy.size(-1)), 1, dummy)
         h_pooled_repeated = h_pooled.unsqueeze(1).expand_as(candidate_feature)
 

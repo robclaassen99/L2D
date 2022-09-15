@@ -12,8 +12,10 @@ device = torch.device(configs.device)
 parser = argparse.ArgumentParser(description='Arguments for ppo_jssp')
 parser.add_argument('--Pn_j', type=int, default=6, help='Number of jobs of instances to test')
 parser.add_argument('--Pn_m', type=int, default=6, help='Number of machines instances to test')
+parser.add_argument('--Pn_t', type=int, default=2, help='Number of trucks instances to test')
 parser.add_argument('--Nn_j', type=int, default=6, help='Number of jobs on which to be loaded net are trained')
 parser.add_argument('--Nn_m', type=int, default=6, help='Number of machines on which to be loaded net are trained')
+parser.add_argument('--Nn_t', type=int, default=2, help='Number of trucks on which to be loaded net are trained')
 parser.add_argument('--low', type=int, default=1, help='LB of duration')
 parser.add_argument('--high', type=int, default=50, help='UB of duration')
 parser.add_argument('--lt_low', type=int, default=1, help='LB of lead time')
@@ -23,6 +25,7 @@ params = parser.parse_args()
 
 N_JOBS_P = params.Pn_j
 N_MACHINES_P = params.Pn_m
+N_TRUCKS_P = params.Pn_t
 LOW = params.low
 HIGH = params.high
 LT_LOW = params.lt_low
@@ -30,11 +33,12 @@ LT_HIGH = params.lt_high
 SEED = params.seed
 N_JOBS_N = params.Nn_j
 N_MACHINES_N = params.Nn_m
+N_TRUCKS_N = params.Nn_t
 
 
 from JSSP_Env import SJSSP
 from PPO_jssp_multiInstances import PPO
-env = SJSSP(n_j=N_JOBS_P, n_m=N_MACHINES_P)
+env = SJSSP(n_j=N_JOBS_P, n_m=N_MACHINES_P, n_t=N_TRUCKS_P)
 
 ppo = PPO(configs.lr, configs.gamma, configs.k_epochs, configs.eps_clip,
           n_j=N_JOBS_P,
@@ -48,8 +52,8 @@ ppo = PPO(configs.lr, configs.gamma, configs.k_epochs, configs.eps_clip,
           hidden_dim_actor=configs.hidden_dim_actor,
           num_mlp_layers_critic=configs.num_mlp_layers_critic,
           hidden_dim_critic=configs.hidden_dim_critic)
-path = './SavedNetwork/{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(LOW) + '_' + str(HIGH) + '_'
-                                      + str(LT_LOW) + '_' + str(LT_HIGH))
+path = './SavedNetwork/{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(N_TRUCKS_N) + '_' + str(LOW)
+                                      + '_' + str(HIGH) + '_' + str(LT_LOW) + '_' + str(LT_HIGH))
 # ppo.policy.load_state_dict(torch.load(path))
 ppo.policy.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
 # ppo.policy.eval()
@@ -61,12 +65,15 @@ g_pool_step = g_pool_cal(graph_pool_type=configs.graph_pool_type,
 from uniform_instance_gen import uni_instance_gen
 np.random.seed(SEED)
 
-dataLoaded = np.load('./DataGen/generatedDataLT' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_Seed' + str(SEED) + '.npy')
+dataLoaded = np.load('./DataGen/generatedDataLTTruck' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_' + str(N_TRUCKS_P)
+                     + '_Seed' + str(SEED) + '.npy')
+arrayLoaded = np.load('./DataGen/generatedArrayLTTruck' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_' + str(N_TRUCKS_P)
+                     + '_Seed' + str(SEED) + '.npy')
 dataset = []
 
 for i in range(dataLoaded.shape[0]):
 # for i in range(1):
-    dataset.append((dataLoaded[i][0], dataLoaded[i][1]))
+    dataset.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2], arrayLoaded[i]))
 
 # dataset = [uni_instance_gen(n_j=N_JOBS_P, n_m=N_MACHINES_P, low=LOW, high=HIGH) for _ in range(N_TEST)]
 # print(dataset[0][0])
