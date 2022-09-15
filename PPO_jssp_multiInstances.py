@@ -267,7 +267,8 @@ def main():
         mean_rewards_all_env = sum(ep_rewards) / len(ep_rewards)
         log.append([i_update, mean_rewards_all_env])
         if (i_update + 1) % 100 == 0:
-            file_writing_obj = open('./' + 'log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high) + '.txt', 'w')
+            file_writing_obj = open('./run_results/logs/' + 'log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_'
+                                    + str(configs.low) + '_' + str(configs.high) + '.txt', 'w')
             file_writing_obj.write(str(log))
 
         # log results
@@ -280,12 +281,13 @@ def main():
             vali_result = - validate(vali_data, ppo.policy).mean()
             validation_log.append(vali_result)
             if vali_result < record:
-                torch.save(ppo.policy.state_dict(), './{}.pth'.format(
+                torch.save(ppo.policy.state_dict(), './SavedNetworkNew/{}.pth'.format(
                     str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high)))
                 record = vali_result
             print('The validation quality is:', vali_result)
             file_writing_obj1 = open(
-                './' + 'vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high) + '.txt', 'w')
+                './run_results/valis/' + 'vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low)
+                + '_' + str(configs.high) + '.txt', 'w')
             file_writing_obj1.write(str(validation_log))
         t5 = time.time()
 
