@@ -2,8 +2,8 @@ from Params import configs
 import numpy as np
 
 
-def permissibleLeftShift(a, durMat, mchMat, mchsStartTimes, opIDsOnMchs):
-    jobRdyTime_a, mchRdyTime_a = calJobAndMchRdyTimeOfa(a, mchMat, durMat, mchsStartTimes, opIDsOnMchs)
+def permissibleLeftShift(a, durMat, ltMat, mchMat, mchsStartTimes, opIDsOnMchs):
+    jobRdyTime_a, mchRdyTime_a = calJobAndMchRdyTimeOfa(a, mchMat, durMat, ltMat, mchsStartTimes, opIDsOnMchs)
     dur_a = np.take(durMat, a)
     mch_a = np.take(mchMat, a) - 1
     startTimesForMchOfa = mchsStartTimes[mch_a]
@@ -57,14 +57,16 @@ def putInBetween(a, idxLegalPos, legalPos, endTimesForPossiblePos, startTimesFor
     return startTime_a
 
 
-def calJobAndMchRdyTimeOfa(a, mchMat, durMat, mchsStartTimes, opIDsOnMchs):
+def calJobAndMchRdyTimeOfa(a, mchMat, durMat, ltMat, mchsStartTimes, opIDsOnMchs):
     mch_a = np.take(mchMat, a) - 1
     # cal jobRdyTime_a
     jobPredecessor = a - 1 if a % mchMat.shape[1] != 0 else None
     if jobPredecessor is not None:
         durJobPredecessor = np.take(durMat, jobPredecessor)
         mchJobPredecessor = np.take(mchMat, jobPredecessor) - 1
-        jobRdyTime_a = (mchsStartTimes[mchJobPredecessor][np.where(opIDsOnMchs[mchJobPredecessor] == jobPredecessor)] + durJobPredecessor).item()
+        ltJobPredecessor = np.take(ltMat, jobPredecessor)
+        jobRdyTime_a = (mchsStartTimes[mchJobPredecessor][np.where(opIDsOnMchs[mchJobPredecessor] == jobPredecessor)]
+                        + durJobPredecessor + ltJobPredecessor).item()
     else:
         jobRdyTime_a = 0
     # cal mchRdyTime_a
@@ -87,6 +89,8 @@ if __name__ == "__main__":
     n_m = 3
     low = 1
     high = 99
+    lt_low = 1
+    lt_high = 99
     SEED = 10
     np.random.seed(SEED)
     env = SJSSP(n_j=n_j, n_m=n_m)
@@ -97,9 +101,11 @@ if __name__ == "__main__":
 
     # rollout env random action
     t1 = time.time()
-    data = uni_instance_gen(n_j=n_j, n_m=n_m, low=low, high=high)
+    data = uni_instance_gen(n_j=n_j, n_m=n_m, low=low, high=high, lt_low=lt_low, lt_high=lt_high)
     print('Dur')
     print(data[0])
+    print('LT')
+    print(data[1])
     print('Mach')
     print(data[-1])
     print()
@@ -127,7 +133,8 @@ if __name__ == "__main__":
         # ts.append(t4 - t3)
         # jobRdyTime_a, mchRdyTime_a = calJobAndMchRdyTimeOfa(a=action, mchMat=data[-1], durMat=data[0], mchsStartTimes=mchsStartTimes, opIDsOnMchs=opIDsOnMchs)
         # print('mchRdyTime_a:', mchRdyTime_a)
-        startTime_a, flag = permissibleLeftShift(a=action, durMat=data[0].astype(np.single), mchMat=data[-1], mchsStartTimes=mchsStartTimes, opIDsOnMchs=opIDsOnMchs)
+        startTime_a, flag = permissibleLeftShift(a=action, durMat=data[0].astype(np.single),
+                                                 ltMat=data[1].astype(np.single), mchMat=data[-1], mchsStartTimes=mchsStartTimes, opIDsOnMchs=opIDsOnMchs)
         flags.append(flag)
         # print('startTime_a:', startTime_a)
         # print('mchsStartTimes\n', mchsStartTimes)

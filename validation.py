@@ -58,6 +58,8 @@ if __name__ == '__main__':
     parser.add_argument('--Nn_m', type=int, default=15, help='Number of machines on which to be loaded net are trained')
     parser.add_argument('--low', type=int, default=1, help='LB of duration')
     parser.add_argument('--high', type=int, default=99, help='UB of duration')
+    parser.add_argument('--lt_low', type=int, default=1, help='LB of lead time')
+    parser.add_argument('--lt_high', type=int, default=99, help='UB of lead time')
     parser.add_argument('--seed', type=int, default=200, help='Cap seed for validate set generation')
     parser.add_argument('--n_vali', type=int, default=100, help='validation set size')
     params = parser.parse_args()
@@ -66,6 +68,8 @@ if __name__ == '__main__':
     N_MACHINES_P = params.Pn_m
     LOW = params.low
     HIGH = params.high
+    LT_LOW = params.lt_low
+    LT_HIGH = params.lt_high
     N_JOBS_N = params.Nn_j
     N_MACHINES_N = params.Nn_m
 
@@ -85,7 +89,8 @@ if __name__ == '__main__':
               num_mlp_layers_critic=configs.num_mlp_layers_critic,
               hidden_dim_critic=configs.hidden_dim_critic)
 
-    path = './{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(LOW) + '_' + str(HIGH))
+    path = './SavedNetwork/LT_{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(LOW) + '_' + str(HIGH)
+                                             + '_' + str(LT_LOW) + '_' + str(LT_HIGH))
     ppo.policy.load_state_dict(torch.load(path))
 
     SEEDs = range(0, params.seed, 10)
@@ -94,7 +99,7 @@ if __name__ == '__main__':
 
         np.random.seed(SEED)
 
-        vali_data = [uni_instance_gen(n_j=N_JOBS_P, n_m=N_MACHINES_P, low=LOW, high=HIGH) for _ in range(params.n_vali)]
+        vali_data = [uni_instance_gen(n_j=N_JOBS_P, n_m=N_MACHINES_P, low=LOW, high=HIGH, lt_low=LT_LOW, lt_high=LT_HIGH) for _ in range(params.n_vali)]
 
         makespan = - validate(vali_data, ppo.policy)
         print(makespan.mean())

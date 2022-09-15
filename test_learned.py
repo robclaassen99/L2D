@@ -10,12 +10,14 @@ import numpy as np
 device = torch.device(configs.device)
 
 parser = argparse.ArgumentParser(description='Arguments for ppo_jssp')
-parser.add_argument('--Pn_j', type=int, default=15, help='Number of jobs of instances to test')
-parser.add_argument('--Pn_m', type=int, default=15, help='Number of machines instances to test')
-parser.add_argument('--Nn_j', type=int, default=15, help='Number of jobs on which to be loaded net are trained')
-parser.add_argument('--Nn_m', type=int, default=15, help='Number of machines on which to be loaded net are trained')
+parser.add_argument('--Pn_j', type=int, default=6, help='Number of jobs of instances to test')
+parser.add_argument('--Pn_m', type=int, default=6, help='Number of machines instances to test')
+parser.add_argument('--Nn_j', type=int, default=6, help='Number of jobs on which to be loaded net are trained')
+parser.add_argument('--Nn_m', type=int, default=6, help='Number of machines on which to be loaded net are trained')
 parser.add_argument('--low', type=int, default=1, help='LB of duration')
-parser.add_argument('--high', type=int, default=99, help='UB of duration')
+parser.add_argument('--high', type=int, default=50, help='UB of duration')
+parser.add_argument('--lt_low', type=int, default=1, help='LB of lead time')
+parser.add_argument('--lt_high', type=int, default=50, help='UB of lead time')
 parser.add_argument('--seed', type=int, default=200, help='Seed for validate set generation')
 params = parser.parse_args()
 
@@ -23,6 +25,8 @@ N_JOBS_P = params.Pn_j
 N_MACHINES_P = params.Pn_m
 LOW = params.low
 HIGH = params.high
+LT_LOW = params.lt_low
+LT_HIGH = params.lt_high
 SEED = params.seed
 N_JOBS_N = params.Nn_j
 N_MACHINES_N = params.Nn_m
@@ -44,7 +48,8 @@ ppo = PPO(configs.lr, configs.gamma, configs.k_epochs, configs.eps_clip,
           hidden_dim_actor=configs.hidden_dim_actor,
           num_mlp_layers_critic=configs.num_mlp_layers_critic,
           hidden_dim_critic=configs.hidden_dim_critic)
-path = './SavedNetwork/{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(LOW) + '_' + str(HIGH))
+path = './SavedNetwork/{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(LOW) + '_' + str(HIGH) + '_'
+                                      + str(LT_LOW) + '_' + str(LT_HIGH))
 # ppo.policy.load_state_dict(torch.load(path))
 ppo.policy.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
 # ppo.policy.eval()
@@ -56,7 +61,7 @@ g_pool_step = g_pool_cal(graph_pool_type=configs.graph_pool_type,
 from uniform_instance_gen import uni_instance_gen
 np.random.seed(SEED)
 
-dataLoaded = np.load('./DataGen/generatedData' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_Seed' + str(SEED) + '.npy')
+dataLoaded = np.load('./DataGen/generatedDataLT' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_Seed' + str(SEED) + '.npy')
 dataset = []
 
 for i in range(dataLoaded.shape[0]):

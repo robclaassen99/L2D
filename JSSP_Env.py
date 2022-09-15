@@ -46,7 +46,9 @@ class SJSSP(gym.Env, EzPickle):
 
             # UPDATE STATE:
             # permissible left shift
-            startTime_a, flag = permissibleLeftShift(a=action, durMat=self.dur, mchMat=self.m, mchsStartTimes=self.mchsStartTimes, opIDsOnMchs=self.opIDsOnMchs)
+            startTime_a, flag = permissibleLeftShift(a=action, durMat=self.dur, ltMat=self.lt,
+                                                     mchMat=self.m, mchsStartTimes=self.mchsStartTimes,
+                                                     opIDsOnMchs=self.opIDsOnMchs)
             self.flags.append(flag)
             # update omega or mask
             if action not in self.last_col:
@@ -54,9 +56,9 @@ class SJSSP(gym.Env, EzPickle):
             else:
                 self.mask[action // self.number_of_machines] = 1
 
-            self.temp1[row, col] = startTime_a + dur_a
+            self.finish_time[row, col] = startTime_a + dur_a
 
-            self.LBs = calEndTimeLB(self.temp1, self.dur_cp)
+            self.LBs = self.getEndTimeLB(self.finish_time, self.dur, self.lt)
 
             # adj matrix
             precd, succd = self.getNghbs(action, self.opIDsOnMchs)
@@ -86,7 +88,7 @@ class SJSSP(gym.Env, EzPickle):
         self.step_count = 0
         self.m = data[-1]
         self.dur = data[0].astype(np.single)
-        self.dur_cp = np.copy(self.dur)
+        self.lt = data[1].astype(np.single)
         # record action history
         self.partial_sol_sequeence = []
         self.flags = []
@@ -102,8 +104,10 @@ class SJSSP(gym.Env, EzPickle):
         self_as_nei = np.eye(self.number_of_tasks, dtype=np.single)
         self.adj = self_as_nei + conj_nei_up_stream
 
+        self.finish_time = np.zeros_like(self.dur, dtype=np.single)
+
         # initialize features
-        self.LBs = np.cumsum(self.dur, axis=1, dtype=np.single)
+        self.LBs = self.getEndTimeLB(self.finish_time, self.dur, self.lt)
         self.initQuality = self.LBs.max() if not configs.init_quality_flag else 0
         self.max_endTime = self.initQuality
         self.finished_mark = np.zeros_like(self.m, dtype=np.single)
@@ -122,7 +126,5 @@ class SJSSP(gym.Env, EzPickle):
         self.mchsStartTimes = -configs.high * np.ones_like(self.dur.transpose(), dtype=np.int32)
         # Ops ID on machines
         self.opIDsOnMchs = -self.number_of_jobs * np.ones_like(self.dur.transpose(), dtype=np.int32)
-
-        self.temp1 = np.zeros_like(self.dur, dtype=np.single)
 
         return self.adj, fea, self.omega, self.mask
