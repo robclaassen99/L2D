@@ -43,6 +43,7 @@ env = SJSSP(n_j=N_JOBS_P, n_m=N_MACHINES_P, n_t=N_TRUCKS_P)
 ppo = PPO(configs.lr, configs.gamma, configs.k_epochs, configs.eps_clip,
           n_j=N_JOBS_P,
           n_m=N_MACHINES_P,
+          n_t=N_TRUCKS_P,
           num_layers=configs.num_layers,
           neighbor_pooling_type=configs.neighbor_pooling_type,
           input_dim=configs.input_dim,
@@ -65,15 +66,15 @@ g_pool_step = g_pool_cal(graph_pool_type=configs.graph_pool_type,
 from uniform_instance_gen import uni_instance_gen
 np.random.seed(SEED)
 
-dataLoaded = np.load('./DataGen/generatedDataLTTruck' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_' + str(N_TRUCKS_P)
+dataLoaded = np.load('./DataGen/generatedDataLTTruckVRL' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_' + str(N_TRUCKS_P)
                      + '_Seed' + str(SEED) + '.npy')
-arrayLoaded = np.load('./DataGen/generatedArrayLTTruck' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_' + str(N_TRUCKS_P)
+arrayLoaded = np.load('./DataGen/generatedArrayLTTruckVRL' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_' + str(N_TRUCKS_P)
                      + '_Seed' + str(SEED) + '.npy')
 dataset = []
 
 for i in range(dataLoaded.shape[0]):
 # for i in range(1):
-    dataset.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2], arrayLoaded[i]))
+    dataset.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2], dataLoaded[i][3], arrayLoaded[i]))
 
 # dataset = [uni_instance_gen(n_j=N_JOBS_P, n_m=N_MACHINES_P, low=LOW, high=HIGH) for _ in range(N_TEST)]
 # print(dataset[0][0])

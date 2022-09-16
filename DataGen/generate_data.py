@@ -19,5 +19,5 @@ t_array = np.array([uni_instance_gen(n_j=j, n_m=m, n_t=t, low=l, high=h, lt_low=
                     for _ in range(batch_size)])
 print(data.shape)
 print(t_array.shape)
-np.save('generatedDataLTTruck{}_{}_{}_Seed{}.npy'.format(j, m, t, seed), data)
-np.save('generatedArrayLTTruck{}_{}_{}_Seed{}.npy'.format(j, m, t, seed), t_array)
+np.save('generatedDataLTTruckVRL{}_{}_{}_Seed{}.npy'.format(j, m, t, seed), data)
+np.save('generatedArrayLTTruckVRL{}_{}_{}_Seed{}.npy'.format(j, m, t, seed), t_array)

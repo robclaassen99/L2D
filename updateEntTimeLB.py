@@ -1,10 +1,7 @@
 import numpy as np
 
 
-def calEndTimeLB(finish_time, durMat, ltMat, actMat, truck_array, n_j, n_t, nbo, last_col, pss):
-    # flatten the duration matrix for easier indexing
-    dur_flat = durMat[np.nonzero(actMat)].flatten()
-    lt_flat = ltMat[np.nonzero(actMat)].flatten()
+def calEndTimeLB(finish_time, dur_flat, lt_flat, actMat, truck_array, n_j, n_t, nbo, last_col, pss):
     lb_completion = np.copy(finish_time)
     # loop over jobs, excluding loading operations
     for job in range(n_j):
@@ -35,5 +32,3 @@ if __name__ == '__main__':
     dur = np.array([[1, 2], [3, 4]])
     lt = np.array([[5, 2], [4, 7]])
     finish_time = np.zeros_like(dur)
-
-    ret = calEndTimeLB(finish_time, dur, lt)

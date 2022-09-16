@@ -2,11 +2,8 @@ from Params import configs
 import numpy as np
 
 
-def permissibleLeftShift(a, job_a, mchMat, durMat, ltMat, actMat, truck_array, first_col, last_col, nbo,
+def permissibleLeftShift(a, job_a, mch_flat, dur_flat, lt_flat, truck_array, first_col, last_col, nbo,
                          mchsStartTimes, opIDsOnMchs):
-    mch_flat = mchMat[np.nonzero(actMat)].flatten()
-    dur_flat = durMat[np.nonzero(actMat)].flatten()
-    lt_flat = ltMat[np.nonzero(actMat)].flatten()
     jobRdyTime_a, mchRdyTime_a = calJobAndMchRdyTimeOfa(a, job_a, mch_flat, dur_flat, lt_flat, truck_array,
                                                         first_col, last_col, nbo, mchsStartTimes, opIDsOnMchs)
     dur_a = dur_flat[a]

@@ -12,14 +12,15 @@ def validate(vali_set, model):
     from Params import configs
     env = SJSSP(n_j=N_JOBS, n_m=N_MACHINES, n_t=N_TRUCKS)
     device = torch.device(configs.device)
-    g_pool_step = g_pool_cal(graph_pool_type=configs.graph_pool_type,
-                             batch_size=torch.Size([1, env.number_of_tasks, env.number_of_tasks]),
-                             n_nodes=env.number_of_tasks,
-                             device=device)
+
     make_spans = []
     # rollout using model
     for data in vali_set:
         adj, fea, candidate, mask = env.reset(data)
+        g_pool_step = g_pool_cal(graph_pool_type=configs.graph_pool_type,
+                                 batch_size=torch.Size([1, env.number_of_tasks, env.number_of_tasks]),
+                                 n_nodes=env.number_of_tasks,
+                                 device=device)
         rewards = - env.initQuality
         while True:
             fea_tensor = torch.from_numpy(np.copy(fea)).to(device)

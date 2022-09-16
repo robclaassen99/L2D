@@ -20,8 +20,6 @@ class SJSSP(gym.Env, EzPickle):
         self.number_of_jobs = n_j
         self.number_of_machines = n_m
         self.number_of_trucks = n_t
-        self.number_of_tasks = self.number_of_jobs * (self.number_of_machines - 1) + self.number_of_trucks
-        self.nbo = self.number_of_jobs * (self.number_of_machines - 1)  # number of basic operations (excluding loading)
         self.getEndTimeLB = calEndTimeLB
         self.getNghbs = getActionNbghs
         self.getCols = get_cols
@@ -40,16 +38,15 @@ class SJSSP(gym.Env, EzPickle):
             # UPDATE BASIC INFO:
             idx = np.where(self.action_matrix == (action + 1))
             row = idx[0][0]
-            col = idx[1][0]
             self.step_count += 1
             self.finished_mark[action] = 1
-            dur_a = self.dur[row, col]
+            dur_a = self.dur[action]
             self.partial_sol_sequeence.append(action)
 
             # UPDATE STATE:
             # permissible left shift
-            startTime_a, flag = permissibleLeftShift(a=action, job_a=row, mchMat=self.m, durMat=self.dur, ltMat=self.lt,
-                                                     actMat=self.action_matrix, truck_array=self.truck_array,
+            startTime_a, flag = permissibleLeftShift(a=action, job_a=row, mch_flat=self.m, dur_flat=self.dur,
+                                                     lt_flat=self.lt, truck_array=self.truck_array,
                                                      first_col=self.first_col, last_col=self.last_col, nbo=self.nbo,
                                                      mchsStartTimes=self.mchsStartTimes, opIDsOnMchs=self.opIDsOnMchs)
             self.flags.append(flag)
@@ -102,25 +99,38 @@ class SJSSP(gym.Env, EzPickle):
 
     @override
     def reset(self, data):
-        # reset scheduled oeprations
+        # reset scheduled operations
         self.step_count = 0
         self.partial_sol_sequeence = []
         self.flags = []
         self.posRewards = 0
 
         # load data
-        self.dur = data[0].astype(np.single)
-        self.lt = data[1].astype(np.single)
-        self.m = data[2]
         self.truck_array = data[-1]
+        self.action_mask = data[3].astype(np.int32)
+        flat_mask = self.action_mask.flatten()
+        # all matrices are flattened by default now!
+        self.dur = (data[0] * self.action_mask).flatten()
+        self.dur = self.dur[flat_mask > 0].astype(np.single)
+        self.lt = (data[1] * self.action_mask).flatten()
+        self.lt = self.lt[flat_mask > 0].astype(np.single)
+        self.m = (data[2] * self.action_mask).flatten()
+        self.m = self.m[flat_mask > 0].astype(np.int32)
+
+        # basic instance information
+        self.number_of_tasks = self.m.shape[0]
+        self.nbo = self.number_of_tasks - self.number_of_trucks
+        self.action_matrix = np.zeros_like(self.action_mask, dtype=np.int32)
+        # note actions start from integer 1, not 0!
+        self.action_matrix[np.nonzero(self.action_mask)] = np.arange(1, self.number_of_tasks + 1)
 
         # action matrix to index actions, as all data matrices now contain zero values
         # indexing of actions starts from 1, not 0
-        self.action_matrix = np.zeros_like(self.m, dtype=np.int32)
-        self.action_matrix[np.nonzero(self.m)] = np.arange(1, self.number_of_tasks + 1)
+        self.action_matrix = np.zeros_like(self.action_mask, dtype=np.int32)
+        self.action_matrix[np.nonzero(self.action_mask)] = np.arange(1, self.number_of_tasks + 1)
 
         # get first col and last col
-        self.first_col, self.last_col = self.getCols(self.m)
+        self.first_col, self.last_col = self.getCols(self.action_mask)
 
         # initialize adj matrix
         conj_nei_up_stream = np.eye(self.number_of_tasks, k=-1, dtype=np.single)
@@ -160,8 +170,8 @@ class SJSSP(gym.Env, EzPickle):
                                     np.full(shape=self.number_of_trucks, fill_value=1, dtype=bool)])
 
         # start time of operations on machines
-        self.mchsStartTimes = -configs.high * np.ones_like(self.dur.transpose(), dtype=np.int32)
+        self.mchsStartTimes = -configs.high * np.ones_like(self.action_mask.transpose(), dtype=np.int32)
         # Ops ID on machines
-        self.opIDsOnMchs = -self.number_of_jobs * np.ones_like(self.dur.transpose(), dtype=np.int32)
+        self.opIDsOnMchs = -self.number_of_jobs * np.ones_like(self.action_mask.transpose(), dtype=np.int32)
 
         return self.adj, fea, self.omega, self.mask

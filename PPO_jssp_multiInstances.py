@@ -23,6 +23,7 @@ class Memory:
         self.r_mb = []
         self.done_mb = []
         self.logprobs = []
+        self.n_nodes_mb = 0
 
     def clear_memory(self):
         del self.adj_mb[:]
@@ -33,6 +34,7 @@ class Memory:
         del self.r_mb[:]
         del self.done_mb[:]
         del self.logprobs[:]
+        self.n_nodes_mb = 0
 
 
 class PPO:
@@ -86,7 +88,7 @@ class PPO:
 
         self.V_loss_2 = nn.MSELoss()
 
-    def update(self, memories, n_tasks, g_pool):
+    def update(self, memories, g_pool):
 
         vloss_coef = configs.vloss_coef
         ploss_coef = configs.ploss_coef
@@ -99,6 +101,7 @@ class PPO:
         mask_mb_t_all_env = []
         a_mb_t_all_env = []
         old_logprobs_mb_t_all_env = []
+        mb_g_pool_all_env = []
         # store data for all env
         for i in range(len(memories)):
             rewards = []
@@ -112,7 +115,7 @@ class PPO:
             rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-5)
             rewards_all_env.append(rewards)
             # process each env data
-            adj_mb_t_all_env.append(aggr_obs(torch.stack(memories[i].adj_mb).to(device), n_tasks))
+            adj_mb_t_all_env.append(aggr_obs(torch.stack(memories[i].adj_mb).to(device), memories[i].n_nodes_mb))
             fea_mb_t = torch.stack(memories[i].fea_mb).to(device)
             fea_mb_t = fea_mb_t.reshape(-1, fea_mb_t.size(-1))
             fea_mb_t_all_env.append(fea_mb_t)
@@ -120,9 +123,8 @@ class PPO:
             mask_mb_t_all_env.append(torch.stack(memories[i].mask_mb).to(device).squeeze())
             a_mb_t_all_env.append(torch.stack(memories[i].a_mb).to(device).squeeze())
             old_logprobs_mb_t_all_env.append(torch.stack(memories[i].logprobs).to(device).squeeze().detach())
-
-        # get batch argument for net forwarding: mb_g_pool is same for all env
-        mb_g_pool = g_pool_cal(g_pool, torch.stack(memories[0].adj_mb).to(device).shape, n_tasks, device)
+            mb_g_pool_all_env.append(g_pool_cal(g_pool, torch.stack(memories[i].adj_mb).to(device).shape,
+                                       memories[i].n_nodes_mb, device))
 
         # Optimize policy for K epochs:
         for _ in range(self.k_epochs):
@@ -130,7 +132,7 @@ class PPO:
             vloss_sum = 0
             for i in range(len(memories)):
                 pis, vals = self.policy(x=fea_mb_t_all_env[i],
-                                        graph_pool=mb_g_pool,
+                                        graph_pool=mb_g_pool_all_env[i],
                                         adj=adj_mb_t_all_env[i],
                                         candidate=candidate_mb_t_all_env[i],
                                         mask=mask_mb_t_all_env[i],
@@ -166,14 +168,14 @@ def main():
     data_generator = uni_instance_gen
 
     dataLoaded = np.load(
-        './DataGen/generatedDataLTTruck' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+        './DataGen/generatedDataLTTruckVRL' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
         + '_Seed' + str(configs.np_seed_validation) + '.npy')
     arrayLoaded = np.load(
-        './DataGen/generatedArrayLTTruck' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+        './DataGen/generatedArrayLTTruckVRL' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
         + '_Seed' + str(configs.np_seed_validation) + '.npy')
     vali_data = []
     for i in range(dataLoaded.shape[0]):
-        vali_data.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2], arrayLoaded[i]))
+        vali_data.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2], dataLoaded[i][3], arrayLoaded[i]))
 
     torch.manual_seed(configs.torch_seed)
     if torch.cuda.is_available():
@@ -196,11 +198,6 @@ def main():
               num_mlp_layers_critic=configs.num_mlp_layers_critic,
               hidden_dim_critic=configs.hidden_dim_critic)
 
-    n_nodes = configs.n_j * (configs.n_m - 1) + configs.n_t
-    g_pool_step = g_pool_cal(graph_pool_type=configs.graph_pool_type,
-                             batch_size=torch.Size([1, n_nodes, n_nodes]),
-                             n_nodes=n_nodes,
-                             device=device)
     # training loop
     log = []
     validation_log = []
@@ -216,11 +213,20 @@ def main():
         fea_envs = []
         candidate_envs = []
         mask_envs = []
+        g_pool_envs = []
+        env_done = [False for _ in range(configs.num_envs)]
         
         for i, env in enumerate(envs):
             adj, fea, candidate, mask = env.reset(data_generator(n_j=configs.n_j, n_m=configs.n_m, n_t=configs.n_t,
                                                                  low=configs.low, high=configs.high,
                                                                  lt_low=configs.lt_low, lt_high=configs.lt_high))
+
+            # we only need to compute g_pool and n_nodes at reset, because they are constant throughout episode
+            g_pool_envs.append(g_pool_cal(graph_pool_type=configs.graph_pool_type,
+                                          batch_size=torch.Size([1, env.number_of_tasks, env.number_of_tasks]),
+                                          n_nodes=env.number_of_tasks,
+                                          device=device))
+            memories[i].n_nodes_mb = env.number_of_tasks  # used to compute mb_g_pool later
             adj_envs.append(adj)
             fea_envs.append(fea)
             candidate_envs.append(candidate)
@@ -237,15 +243,19 @@ def main():
                 action_envs = []
                 a_idx_envs = []
                 for i in range(configs.num_envs):
-                    pi, _ = ppo.policy_old(x=fea_tensor_envs[i],
-                                           graph_pool=g_pool_step,
-                                           padded_nei=None,
-                                           adj=adj_tensor_envs[i],
-                                           candidate=candidate_tensor_envs[i].unsqueeze(0),
-                                           mask=mask_tensor_envs[i].unsqueeze(0))
-                    action, a_idx = select_action(pi, candidate_envs[i], memories[i])
-                    action_envs.append(action)
-                    a_idx_envs.append(a_idx)
+                    if not env_done[i]:
+                        pi, _ = ppo.policy_old(x=fea_tensor_envs[i],
+                                               graph_pool=g_pool_envs[i],
+                                               padded_nei=None,
+                                               adj=adj_tensor_envs[i],
+                                               candidate=candidate_tensor_envs[i].unsqueeze(0),
+                                               mask=mask_tensor_envs[i].unsqueeze(0))
+                        action, a_idx = select_action(pi, candidate_envs[i], memories[i])
+                        action_envs.append(action)
+                        a_idx_envs.append(a_idx)
+                    else:  # add 0 to ensure correct indexing, but values will not be stored in memory
+                        action_envs.append(0)
+                        a_idx_envs.append(0)
             
             adj_envs = []
             fea_envs = []
@@ -253,33 +263,44 @@ def main():
             mask_envs = []
             # Saving episode data
             for i in range(configs.num_envs):
-                memories[i].adj_mb.append(adj_tensor_envs[i])
-                memories[i].fea_mb.append(fea_tensor_envs[i])
-                memories[i].candidate_mb.append(candidate_tensor_envs[i])
-                memories[i].mask_mb.append(mask_tensor_envs[i])
-                memories[i].a_mb.append(a_idx_envs[i])
+                if not env_done[i]:
+                    memories[i].adj_mb.append(adj_tensor_envs[i])
+                    memories[i].fea_mb.append(fea_tensor_envs[i])
+                    memories[i].candidate_mb.append(candidate_tensor_envs[i])
+                    memories[i].mask_mb.append(mask_tensor_envs[i])
+                    memories[i].a_mb.append(a_idx_envs[i])
 
-                adj, fea, reward, done, candidate, mask = envs[i].step(action_envs[i].item())
-                adj_envs.append(adj)
-                fea_envs.append(fea)
-                candidate_envs.append(candidate)
-                mask_envs.append(mask)
-                ep_rewards[i] += reward
-                memories[i].r_mb.append(reward)
-                memories[i].done_mb.append(done)
-            if envs[0].done():
+                    adj, fea, reward, done, candidate, mask = envs[i].step(action_envs[i].item())
+                    adj_envs.append(adj)
+                    fea_envs.append(fea)
+                    candidate_envs.append(candidate)
+                    mask_envs.append(mask)
+                    ep_rewards[i] += reward
+                    memories[i].r_mb.append(reward)
+                    memories[i].done_mb.append(done)
+
+                    if done:
+                        env_done[i] = done
+                else:
+                    adj_envs.append(0)
+                    fea_envs.append(0)
+                    candidate_envs.append(0)
+                    mask_envs.append(0)
+
+            if all(env_done):
                 break
+
         for j in range(configs.num_envs):
             ep_rewards[j] -= envs[j].posRewards
 
-        loss, v_loss = ppo.update(memories, n_nodes, configs.graph_pool_type)
+        loss, v_loss = ppo.update(memories, configs.graph_pool_type)
         for memory in memories:
             memory.clear_memory()
         mean_rewards_all_env = sum(ep_rewards) / len(ep_rewards)
         log.append([i_update, mean_rewards_all_env])
         if (i_update + 1) % 100 == 0:
             file_writing_obj = open(
-                './run_results/logs/' + 'log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+                './run_results/logs/' + 'log_LeadTime_Loading_VRL_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
                 + '_' + str(configs.low) + '_' + str(configs.high) + '_' + str(configs.lt_low) + '_'
                 + str(configs.lt_high) + '.txt', 'w')
             file_writing_obj.write(str(log))
@@ -294,13 +315,13 @@ def main():
             vali_result = - validate(vali_data, ppo.policy).mean()
             validation_log.append(vali_result)
             if vali_result < record:
-                torch.save(ppo.policy.state_dict(), './SavedNetworkNew/{}.pth'.format(
+                torch.save(ppo.policy.state_dict(), './SavedNetworkNew/LeadTime_Loading_VRL_{}.pth'.format(
                     str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t) + '_' + str(configs.low) + '_'
                     + str(configs.high) + '_' + str(configs.lt_low) + '_' + str(configs.lt_high)))
                 record = vali_result
             print('The validation quality is:', vali_result)
             file_writing_obj1 = open(
-                './run_results/valis/' + 'vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+                './run_results/valis/' + 'vali_LeadTime_Loading_VRL_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
                 + '_' + str(configs.low) + '_' + str(configs.high) + '_' + str(configs.lt_low)
                 + '_' + str(configs.lt_high) + '.txt', 'w')
             file_writing_obj1.write(str(validation_log))
