@@ -22,6 +22,9 @@ If you make use of the code/experiment or L2D algorithm in your work, please cit
 ```
 
 ## Installation
+Note that it is an absolute requirement to use this specific version of Pytorch. Results might not be reproducible 
+if a newer version is used.
+
 Pytorch 1.6
 
 Gym 0.17.3
