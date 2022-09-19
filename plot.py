@@ -11,17 +11,21 @@ show = True
 save = False
 save_file_type = '.pdf'
 # problem params
-n_j = 15
-n_m = 15
+n_j = 6
+n_m = 6
+n_t = 2
 l = 1
 h = 99
+lt_l = 1
+lt_h = 99
 stride = 50
 datatype = 'vali'  # 'vali', 'log'
+run_type = 'L2D-LeadTime_Loading_VRL'
 
-
-f = open('./{}_{}_{}_{}_{}.txt'.format(datatype, n_j, n_m, l, h), 'r').readline()
+f = open('./run_results/{}s/{}_{}_{}_{}_{}_{}_{}_{}_{}.txt'.format(datatype, run_type, datatype, n_j, n_m, n_t, l, h, lt_l, lt_h), 'r').readline()
 if datatype == 'vali':
-    obj = numpy.array([float(s) for s in re.findall(r'-?\d+\.?\d*', f)[1::2]])[:]
+    obj = numpy.array([float(s) for s in re.findall(r'-?\d+\.?\d*', f)])[:]
+    # obj = numpy.array([float(s) for s in re.findall(r'-?\d+\.?\d*', f)[1::2]])[:]
     idx = np.arange(obj.shape[0])
     # plotting...
     plt.xlabel('Iteration', {'size': x_label_scale})
@@ -35,7 +39,7 @@ if datatype == 'vali':
     if show:
         plt.show()
 elif datatype == 'log':
-    obj = numpy.array([float(s) for s in re.findall(r'-?\d+\.?\d*', f)[1::2]])[:].reshape(-1, stride).mean(axis=-1)
+    obj = numpy.array([float(s) for s in re.findall(r'-?\d+\.?\d*', f)])[1::2][:].reshape(-1, stride).mean(axis=-1)
     idx = np.arange(obj.shape[0])
     # plotting...
     plt.xlabel('Iteration', {'size': x_label_scale})
@@ -50,6 +54,4 @@ elif datatype == 'log':
         plt.show()
 else:
     print('Wrong datatype.')
-
-
 
