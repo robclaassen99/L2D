@@ -11,8 +11,8 @@ show = True
 save = False
 save_file_type = '.pdf'
 # problem params
-n_j = 20
-n_m = 10
+n_j = 6
+n_m = 6
 l = 1
 h = 99
 stride = 50
@@ -21,7 +21,8 @@ datatype = 'log'  # 'vali', 'log'
 
 f = open('./run_results/{}s/{}_{}_{}_{}_{}.txt'.format(datatype, datatype, n_j, n_m, l, h), 'r').readline()
 if datatype == 'vali':
-    obj = numpy.array([float(s) for s in re.findall(r'-?\d+\.?\d*', f)[1::2]])[:]
+    obj = numpy.array([float(s) for s in re.findall(r'-?\d+\.?\d*', f)])[:]
+    # obj = numpy.array([float(s) for s in re.findall(r'-?\d+\.?\d*', f)[1::2]])[:]
     idx = np.arange(obj.shape[0])
     # plotting...
     plt.xlabel('Iteration', {'size': x_label_scale})
