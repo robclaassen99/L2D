@@ -163,7 +163,7 @@ def main():
     from uniform_instance_gen import uni_instance_gen
     data_generator = uni_instance_gen
 
-    dataLoaded = np.load('./DataGen/generatedDataLT' + str(configs.n_j) + '_' + str(configs.n_m) + '_Seed' + str(configs.np_seed_validation) + '.npy')
+    dataLoaded = np.load('./DataGen/generatedData_' + str(configs.run_type) + '_' + str(configs.n_j) + '_' + str(configs.n_m) + '_Seed' + str(configs.np_seed_validation) + '.npy')
     vali_data = []
     for i in range(dataLoaded.shape[0]):
         vali_data.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2]))
@@ -270,7 +270,7 @@ def main():
         log.append([i_update, mean_rewards_all_env])
         if (i_update + 1) % 100 == 0:
             file_writing_obj = open(
-                './run_results/logs/' + 'log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low)
+                './run_results/logs/' + str(configs.run_type) + '_log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low)
                 + '_' + str(configs.high) + '_' + str(configs.lt_low) + '_' + str(configs.lt_high) + '.txt', 'w')
             file_writing_obj.write(str(log))
 
@@ -284,13 +284,13 @@ def main():
             vali_result = - validate(vali_data, ppo.policy).mean()
             validation_log.append(vali_result)
             if vali_result < record:
-                torch.save(ppo.policy.state_dict(), './SavedNetworkNew/{}.pth'.format(
+                torch.save(ppo.policy.state_dict(), './SavedNetworkNew/{}.pth'.format(str(configs.run_type) + '_' +
                     str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high)
                     + '_' + str(configs.lt_low) + '_' + str(configs.lt_high)))
                 record = vali_result
             print('The validation quality is:', vali_result)
             file_writing_obj1 = open(
-                './run_results/valis/' + 'vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low)
+                './run_results/valis/' + str(configs.run_type) + '_vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low)
                 + '_' + str(configs.high) + '_' + str(configs.lt_low) + '_' + str(configs.lt_high) + '.txt', 'w')
             file_writing_obj1.write(str(validation_log))
         t5 = time.time()
