@@ -163,7 +163,7 @@ def main():
     from uniform_instance_gen import uni_instance_gen
     data_generator = uni_instance_gen
 
-    dataLoaded = np.load('./DataGen/generatedData' + str(configs.n_j) + '_' + str(configs.n_m) + '_Seed' + str(configs.np_seed_validation) + '.npy')
+    dataLoaded = np.load('./DataGen/generatedDataConst' + str(configs.n_j) + '_' + str(configs.n_m) + '_Seed' + str(configs.np_seed_validation) + '.npy')
     vali_data = []
     for i in range(dataLoaded.shape[0]):
         vali_data.append((dataLoaded[i][0], dataLoaded[i][1]))
