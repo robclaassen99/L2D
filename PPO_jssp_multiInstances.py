@@ -279,7 +279,7 @@ def main():
         log.append([i_update, mean_rewards_all_env])
         if (i_update + 1) % 100 == 0:
             file_writing_obj = open(
-                './run_results/logs/' + 'log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+                './run_results/logs/' + str(configs.run_type) + '_log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
                 + '_' + str(configs.low) + '_' + str(configs.high) + '_' + str(configs.lt_low) + '_'
                 + str(configs.lt_high) + '.txt', 'w')
             file_writing_obj.write(str(log))
@@ -300,7 +300,7 @@ def main():
                 record = vali_result
             print('The validation quality is:', vali_result)
             file_writing_obj1 = open(
-                './run_results/valis/' + 'vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+                './run_results/valis/' + str(configs.run_type) + '_vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
                 + '_' + str(configs.low) + '_' + str(configs.high) + '_' + str(configs.lt_low)
                 + '_' + str(configs.lt_high) + '.txt', 'w')
             file_writing_obj1.write(str(validation_log))
