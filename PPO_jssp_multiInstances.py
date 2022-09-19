@@ -302,7 +302,8 @@ def main():
         log.append([i_update, mean_rewards_all_env])
         if (i_update + 1) % 100 == 0:
             file_writing_obj = open(
-                './run_results/logs/' + 'log_LeadTime_Loading_VRL_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+                './run_results/logs/' + str(configs.run_type) + '_log_' + str(configs.n_j) + '_' + str(
+                    configs.n_m) + '_' + str(configs.n_t)
                 + '_' + str(configs.low) + '_' + str(configs.high) + '_' + str(configs.lt_low) + '_'
                 + str(configs.lt_high) + '.txt', 'w')
             file_writing_obj.write(str(log))
@@ -310,20 +311,23 @@ def main():
         # log results
         print('Episode {}\t Last reward: {:.2f}\t Mean_Vloss: {:.8f}'.format(
             i_update + 1, mean_rewards_all_env, v_loss))
-        
+
         # validate and save use mean performance
         t4 = time.time()
         if (i_update + 1) % 100 == 0:
             vali_result = - validate(vali_data, ppo.policy).mean()
             validation_log.append(vali_result)
             if vali_result < record:
-                torch.save(ppo.policy.state_dict(), './SavedNetworkNew/LeadTime_Loading_VRL_{}.pth'.format(
-                    str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t) + '_' + str(configs.low) + '_'
-                    + str(configs.high) + '_' + str(configs.lt_low) + '_' + str(configs.lt_high)))
+                torch.save(ppo.policy.state_dict(), './SavedNetworkNew/{}.pth'.format(str(configs.run_type) + '_' +
+                                                                                      str(configs.n_j) + '_' + str(
+                    configs.n_m) + '_' + str(configs.n_t) + '_' + str(configs.low) + '_'
+                                                                                      + str(configs.high) + '_' + str(
+                    configs.lt_low) + '_' + str(configs.lt_high)))
                 record = vali_result
             print('The validation quality is:', vali_result)
             file_writing_obj1 = open(
-                './run_results/valis/' + 'vali_LeadTime_Loading_VRL_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+                './run_results/valis/' + str(configs.run_type) + '_vali_' + str(configs.n_j) + '_' + str(
+                    configs.n_m) + '_' + str(configs.n_t)
                 + '_' + str(configs.low) + '_' + str(configs.high) + '_' + str(configs.lt_low)
                 + '_' + str(configs.lt_high) + '.txt', 'w')
             file_writing_obj1.write(str(validation_log))
