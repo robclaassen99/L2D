@@ -166,10 +166,10 @@ def main():
     data_generator = uni_instance_gen
 
     dataLoaded = np.load(
-        './DataGen/generatedDataLTTruck' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+        './DataGen/generatedData_' + str(configs.run_type) + '_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
         + '_Seed' + str(configs.np_seed_validation) + '.npy')
     arrayLoaded = np.load(
-        './DataGen/generatedArrayLTTruck' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
+        './DataGen/generatedArray_' + str(configs.run_type) + '_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.n_t)
         + '_Seed' + str(configs.np_seed_validation) + '.npy')
     vali_data = []
     for i in range(dataLoaded.shape[0]):
