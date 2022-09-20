@@ -1,14 +1,14 @@
 import numpy as np
 from uniform_instance_gen import uni_instance_gen
 
-j = 6
-m = 6
-t = 2
+j = 15
+m = 15
+t = 10
 l = 1
 h = 99
 lt_l = 1
 lt_h = 99
-run_type = 'L2D-LeadTime_Loading'
+run_type = 'L2D-LeadTime_Loading_VRL'
 batch_size = 100
 seed = 200
 
