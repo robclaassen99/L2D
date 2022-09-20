@@ -8,7 +8,7 @@ l = 1
 h = 99
 lt_l = 1
 lt_h = 99
-run_type = 'L2D-LeadTime_Loading_VRL'
+run_type = 'L2D-LeadTime_Loading_VRL2'
 batch_size = 100
 seed = 200
 

@@ -35,8 +35,6 @@ def extend_matrix(input_mat: np.ndarray, n_j: int, n_m: int, n_t: int, low: int,
 def binary_mask_random(arr):
     n_zeros = np.random.randint(0, arr.shape[0])
     if n_zeros > 0:
-        # NOTE: changed this to + 1, so validation set and training instance of 10x10 are only reproducible of we
-        # remove this + 1 again
         for i in range(np.random.randint(0, n_zeros + 1)):
             x = np.random.randint(0, arr.shape[0])
             arr[x] = 0

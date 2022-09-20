@@ -3,7 +3,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Arguments for ppo_jssp')
 # args for device
 parser.add_argument('--device', type=str, default="cuda", help='Number of jobs of instances')
-parser.add_argument('--run_type', type=str, default="L2D-LeadTime_Loading_VRL", help='Problem instance type that we run')
+parser.add_argument('--run_type', type=str, default="L2D-LeadTime_Loading_VRL2", help='Problem instance type that we run')
 # args for env
 parser.add_argument('--n_j', type=int, default=15, help='Number of jobs of instance')
 parser.add_argument('--n_m', type=int, default=15, help='Number of machines instance')
@@ -33,7 +33,7 @@ parser.add_argument('--hidden_dim_critic', type=int, default=32, help='hidden di
 # args for PPO
 parser.add_argument('--num_envs', type=int, default=4, help='No. of envs for training')
 parser.add_argument('--max_updates', type=int, default=10000, help='No. of episodes of each env for training')
-parser.add_argument('--lr', type=float, default=5e-6, help='lr')
+parser.add_argument('--lr', type=float, default=2e-5, help='lr')
 parser.add_argument('--decayflag', type=bool, default=True, help='lr decayflag')
 parser.add_argument('--decay_step_size', type=int, default=2000, help='decay_step_size')
 parser.add_argument('--decay_ratio', type=float, default=0.9, help='decay_ratio, e.g. 0.9, 0.95')
