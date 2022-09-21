@@ -32,14 +32,15 @@ def extend_matrix(input_mat: np.ndarray, n_j: int, n_m: int, n_t: int, low: int,
     return out_mat
 
 
-def uni_instance_gen(n_j, n_m, n_t, low, high, lt_low, lt_high):
+def uni_instance_gen(n_j, n_m, n_t, low, high, lt_low, lt_high, shuffle_machines):
     assert n_j >= n_t, 'Number of trucks must be leq number of jobs'
 
     # n_m - 1 because last machine is specifically for loading
     times = np.random.randint(low=low, high=high, size=(n_j, n_m - 1))
     lead_times = np.random.randint(low=lt_low, high=lt_high, size=(n_j, n_m - 1))
     machines = np.expand_dims(np.arange(1, n_m), axis=0).repeat(repeats=n_j, axis=0)
-    machines = permute_rows(machines)
+    if shuffle_machines:
+        machines = permute_rows(machines)
 
     # loading operations only have >0 duration for loading machine
     # basic operations have 0 duration for loading machine, >0 all other machines
@@ -73,4 +74,5 @@ if __name__ == '__main__':
     high = 10
     lt_low = 1
     lt_high = 10
-    dur, lt, m, truck_list = uni_instance_gen(n_j, n_m, n_t, low, high, lt_low, lt_high)
+    shuffle_machines = True
+    dur, lt, m, truck_list = uni_instance_gen(n_j, n_m, n_t, low, high, lt_low, lt_high, shuffle_machines)
