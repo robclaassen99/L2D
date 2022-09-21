@@ -221,7 +221,8 @@ def main():
         for i, env in enumerate(envs):
             adj, fea, candidate, mask = env.reset(data_generator(n_j=configs.n_j, n_m=configs.n_m, n_t=configs.n_t,
                                                                  low=configs.low, high=configs.high,
-                                                                 lt_low=configs.lt_low, lt_high=configs.lt_high))
+                                                                 lt_low=configs.lt_low, lt_high=configs.lt_high,
+                                                                 shuffle_machines=configs.shuffle_machines))
 
             # we only need to compute g_pool and n_nodes at reset, because they are constant throughout episode
             g_pool_envs.append(g_pool_cal(graph_pool_type=configs.graph_pool_type,

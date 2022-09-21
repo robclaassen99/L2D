@@ -11,16 +11,16 @@ show = True
 save = False
 save_file_type = '.pdf'
 # problem params
-n_j = 15
-n_m = 15
-n_t = 10
+n_j = 6
+n_m = 6
+n_t = 2
 l = 1
 h = 99
 lt_l = 1
 lt_h = 99
 stride = 50
-datatype = 'vali'  # 'vali', 'log'
-run_type = 'L2D-LeadTime_Loading_VRL2'
+datatype = 'log'  # 'vali', 'log'
+run_type = 'L2D-LeadTime_Loading_VRL'
 
 f = open('./run_results/{}s/{}_{}_{}_{}_{}_{}_{}_{}_{}.txt'.format(datatype, run_type, datatype, n_j, n_m, n_t, l, h, lt_l, lt_h), 'r').readline()
 if datatype == 'vali':
