@@ -11,8 +11,8 @@ show = True
 save = False
 save_file_type = '.pdf'
 # problem params
-n_j = 6
-n_m = 6
+n_j = 15
+n_m = 15
 l = 1
 h = 99
 lt_l = 1

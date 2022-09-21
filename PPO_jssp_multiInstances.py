@@ -211,7 +211,8 @@ def main():
         for i, env in enumerate(envs):
             adj, fea, candidate, mask = env.reset(data_generator(n_j=configs.n_j, n_m=configs.n_m,
                                                                  low=configs.low, high=configs.high,
-                                                                 lt_low=configs.lt_low, lt_high=configs.lt_high))
+                                                                 lt_low=configs.lt_low, lt_high=configs.lt_high,
+                                                                 shuffle_machines=configs.shuffle_machines))
             adj_envs.append(adj)
             fea_envs.append(fea)
             candidate_envs.append(candidate)
