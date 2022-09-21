@@ -19,7 +19,7 @@ h = 99
 lt_l = 1
 lt_h = 99
 stride = 50
-datatype = 'log'  # 'vali', 'log'
+datatype = 'vali'  # 'vali', 'log'
 run_type = 'L2D-LeadTime_Loading_VRL'
 
 f = open('./run_results/{}s/{}_{}_{}_{}_{}_{}_{}_{}_{}.txt'.format(datatype, run_type, datatype, n_j, n_m, n_t, l, h, lt_l, lt_h), 'r').readline()
