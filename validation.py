@@ -1,7 +1,7 @@
 def validate(vali_set, model):
     N_JOBS = vali_set[0][-1].shape[0]
     N_MACHINES = vali_set[0][0].shape[1]
-    N_TRUCKS = vali_set[0][0].shape[0] - N_MACHINES
+    N_TRUCKS = vali_set[0][0].shape[0] - N_JOBS
 
     from JSSP_Env import SJSSP
     from mb_agg import g_pool_cal
