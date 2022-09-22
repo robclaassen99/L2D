@@ -11,8 +11,8 @@ show = True
 save = False
 save_file_type = '.pdf'
 # problem params
-n_j = 6
-n_m = 6
+n_j = 15
+n_m = 15
 l = 1
 h = 99
 lt_l = 1
@@ -28,7 +28,8 @@ if datatype == 'vali':
     print(obj.shape[0])
     idx = np.arange(obj.shape[0])
     # plotting...
-    plt.xlabel('Iteration', {'size': x_label_scale})
+    plt.title('Makespan on unseen data')
+    plt.xlabel('Checkpoint', {'size': x_label_scale})
     plt.ylabel('MakeSpan', {'size': y_label_scale})
     plt.grid()
     plt.plot(idx, obj, color='tab:blue', label='{}x{}'.format(n_j, n_m))
@@ -39,11 +40,12 @@ if datatype == 'vali':
     if show:
         plt.show()
 elif datatype == 'log':
-    obj = numpy.array([float(s) for s in re.findall(r'-?\d+\.?\d*', f)[1::2]])[:].reshape(-1, stride).mean(axis=-1)
+    obj = numpy.array([- float(s) for s in re.findall(r'-?\d+\.?\d*', f)[1::2]])[:].reshape(-1, stride).mean(axis=-1)
     print(obj.shape[0])
     idx = np.arange(obj.shape[0])
     # plotting...
-    plt.xlabel('Iteration', {'size': x_label_scale})
+    plt.title('Makespan during training')
+    plt.xlabel('Iteration (x50)', {'size': x_label_scale})
     plt.ylabel('MakeSpan', {'size': y_label_scale})
     plt.grid()
     plt.plot(idx, obj, color='tab:blue', label='{}x{}'.format(n_j, n_m))
