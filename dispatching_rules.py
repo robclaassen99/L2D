@@ -75,6 +75,14 @@ def most_operations_remaining(candidates, mask, env):
     return action
 
 
+def random_selection(candidates, mask):
+    # perform masking for jobs and candidates
+    inverted_mask = [not elem for elem in mask]
+    masked_candidates = np.array(list(compress(candidates, inverted_mask)))
+    action = np.random.choice(masked_candidates)
+    return action
+
+
 def earliest_due_date(candidates, mask, env, due_dates):
     inverted_mask = [not elem for elem in mask]
     masked_candidates = np.array(list(compress(candidates, inverted_mask)))
@@ -87,59 +95,65 @@ def earliest_due_date(candidates, mask, env, due_dates):
     return action
 
 
-def baseline_performance(data_set, rule_name):
-    # TODO: check baseline performance function
-    assert rule_name in ['spt', 'lpt', 'mwr', 'edd', 'mor'], 'Dispatching rule not implemented'
-
-    n_j = configs.n_j
-    n_m = configs.n_m
-    n_t = configs.n_t
-
+def baseline_performance(data_set, n_j, n_m, n_t, rule_set, verbose=False):
     env = SJSSP(n_j=n_j, n_m=n_m, n_t=n_t)
 
-    make_spans = []
+    avg_make_spans = {}
+    make_spans = {}
 
     # rollout episode using current model
-    for data in data_set:
-        # reset JSSP environment
-        adj, node_fea, candidates, mask = env.reset(data)
-        rewards = 0
+    for rule in rule_set:
+        make_spans[rule] = []
+        for i, data in enumerate(data_set):
 
-        while True:
-            if rule_name == 'spt':
-                action = shortest_processing_time(candidates, mask, env.dur)
-            elif rule_name == 'lpt':
-                action = largest_processing_time(candidates, mask, env.dur)
-            elif rule_name == 'mwr':
-                action = most_work_remaining(candidates, mask, env)
-            elif rule_name == 'edd':
-                # TODO: change due_date
-                due_dates = [0]
-                action = earliest_due_date(candidates, mask, env, due_dates)
-            elif rule_name == 'mor':
-                action = most_operations_remaining(candidates, mask, env)
-            adj, fea, reward, done, candidates, mask = env.step(action.item())
-            rewards += reward
+            # reset JSSP environment
+            adj, node_fea, candidates, mask = env.reset(data)
+            rewards = - env.initQuality
+            while True:
+                if rule == 'spt':
+                    action = shortest_processing_time(candidates, mask, env.dur)
+                elif rule == 'lpt':
+                    action = largest_processing_time(candidates, mask, env.dur)
+                elif rule == 'mwr':
+                    action = most_work_remaining(candidates, mask, env)
+                elif rule == 'mor':
+                    action = most_operations_remaining(candidates, mask, env)
+                elif rule == 'rand':
+                    action = random_selection(candidates, mask)
+                elif rule == 'edd':
+                    # TODO: change due_date
+                    due_dates = [0]
+                    action = earliest_due_date(candidates, mask, env, due_dates)
+                adj, fea, reward, done, candidates, mask = env.step(action.item())
+                rewards += reward
 
-            if done:
-                break
+                if done:
+                    break
 
-        make_spans.append(rewards - env.posRewards)
+            make_spans[rule].append(rewards - env.posRewards)
 
-    return np.array(make_spans)
+        avg_make_spans[rule] = sum(make_spans[rule]) / len(make_spans[rule])
+
+    return make_spans, avg_make_spans
 
 
 if __name__ == '__main__':
+    n_j = 15
+    n_m = 10
+    n_t = 10
+    run_type = "L2D-LeadTime_Loading_VRL"
+    seed_val = 200
+
     dataLoaded = np.load(
-        './DataGen/generatedData_' + str(configs.run_type) + '_' + str(configs.n_j) + '_' + str(
-            configs.n_m) + '_' + str(configs.n_t)
-        + '_Seed' + str(configs.np_seed_validation) + '.npy')
+        './DataGen/generatedData_' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_' + str(n_t)
+        + '_Seed' + str(seed_val) + '.npy')
     arrayLoaded = np.load(
-        './DataGen/generatedArray_' + str(configs.run_type) + '_' + str(configs.n_j) + '_' + str(
-            configs.n_m) + '_' + str(configs.n_t)
-        + '_Seed' + str(configs.np_seed_validation) + '.npy')
+        './DataGen/generatedArray_' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_' + str(n_t)
+        + '_Seed' + str(seed_val) + '.npy')
     vali_data = []
     for i in range(dataLoaded.shape[0]):
         vali_data.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2], dataLoaded[i][3], arrayLoaded[i]))
 
-    results = baseline_performance([vali_data[1]], 'mwr')
+    rule_set = ['rand', 'mor', 'mwr', 'lpt', 'spt']
+    makespans, avg_makespans = baseline_performance(vali_data, n_j, n_m, n_t, rule_set)  # [vali_data[0]]
+    temp = 0
