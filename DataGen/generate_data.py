@@ -1,13 +1,13 @@
 import numpy as np
 from uniform_instance_gen import uni_instance_gen
 
-j = 15
-m = 15
+j = 20
+m = 10
 l = 1
 h = 99
 lt_l = 1
 lt_h = 99
-shuffle_machines=True
+shuffle_machines = True
 run_type = 'L2D-LeadTime'
 batch_size = 100
 seed = 200
