@@ -1,9 +1,9 @@
 import numpy as np
 from uniform_instance_gen import uni_instance_gen
 
-j = 15
-m = 15
-t = 10
+j = 10
+m = 10
+t = 5
 l = 1
 h = 99
 lt_l = 1
