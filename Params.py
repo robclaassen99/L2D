@@ -3,10 +3,10 @@ import argparse
 parser = argparse.ArgumentParser(description='Arguments for ppo_jssp')
 # args for device
 parser.add_argument('--device', type=str, default="cuda", help='Number of jobs of instances')
-parser.add_argument('--run_type', type=str, default="L2D-LeadTime", help='Problem instance type that we run')
+parser.add_argument('--run_type', type=str, default="L2D-LeadTime2", help='Problem instance type that we run')
 # args for env
-parser.add_argument('--n_j', type=int, default=30, help='Number of jobs of instance')
-parser.add_argument('--n_m', type=int, default=10, help='Number of machines instance')
+parser.add_argument('--n_j', type=int, default=6, help='Number of jobs of instance')
+parser.add_argument('--n_m', type=int, default=6, help='Number of machines instance')
 parser.add_argument('--rewardscale', type=float, default=0., help='Reward scale for positive rewards')
 parser.add_argument('--init_quality_flag', type=bool, default=False, help='Flag of whether init state quality is 0, True for 0')
 parser.add_argument('--low', type=int, default=1, help='LB of duration')
