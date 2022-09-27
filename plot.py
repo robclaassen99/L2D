@@ -11,9 +11,9 @@ show = True
 save = False
 save_file_type = '.pdf'
 # problem params
-n_j = 15
+n_j = 20
 n_m = 10
-n_t = 10
+n_t = 15
 l = 1
 h = 99
 lt_l = 1
@@ -32,7 +32,7 @@ if datatype == 'vali':
     plt.xlabel('Checkpoint', {'size': x_label_scale})
     plt.ylabel('MakeSpan', {'size': y_label_scale})
     plt.grid()
-    plt.plot(idx, obj, color='tab:blue', label='{}x{}'.format(n_j, n_m))
+    plt.plot(idx, obj, color='tab:blue', label='{}x{}x{} DRL'.format(n_j, n_m, n_t))
     plt.tight_layout()
     plt.legend(fontsize=anchor_text_size)
     if save:
@@ -47,7 +47,7 @@ elif datatype == 'log':
     plt.xlabel('Iteration (x50)', {'size': x_label_scale})
     plt.ylabel('MakeSpan', {'size': y_label_scale})
     plt.grid()
-    plt.plot(idx, obj, color='tab:blue', label='{}x{}'.format(n_j, n_m))
+    plt.plot(idx, obj, color='tab:blue', label='{}x{}x{}'.format(n_j, n_m, n_t))
     plt.tight_layout()
     plt.legend(fontsize=anchor_text_size)
     if save:
