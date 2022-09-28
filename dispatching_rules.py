@@ -1,6 +1,5 @@
 from itertools import compress
 import numpy as np
-from Params import configs
 from JSSP_Env import SJSSP
 
 
@@ -102,60 +101,3 @@ def earliest_due_date(candidates, mask, env, due_dates):
     earliest_op = np.argmin(due_dates_candidates)
     action = masked_candidates[earliest_op]
     return action
-
-
-def baseline_performance(data_set, n_j, n_m):
-    env = SJSSP(n_j=n_j, n_m=n_m)
-
-    avg_make_spans = {}
-    make_spans = {}
-    # rule_set = ['spt', 'lpt', 'mwr', 'mtr', 'mor']
-    rule_set = ['rand', 'mtr', 'mor', 'mwr', 'lpt', 'spt']
-
-    # rollout episode using current model
-    for rule in rule_set:
-        make_spans[rule] = []
-        for data in data_set:
-
-            # reset JSSP environment
-            adj, node_fea, candidates, mask = env.reset(data)
-            rewards = - env.initQuality
-            while True:
-                if rule == 'spt':
-                    action = shortest_processing_time(candidates, mask, env.dur)
-                elif rule == 'lpt':
-                    action = largest_processing_time(candidates, mask, env.dur)
-                elif rule == 'mwr':
-                    action = most_work_remaining(candidates, mask, env)
-                elif rule == 'mtr':
-                    action = most_time_remaining(candidates, mask, env)
-                elif rule == 'mor':
-                    action = most_operations_remaining(candidates, mask, env)
-                elif rule == 'rand':
-                    action = random_selection(candidates, mask)
-                elif rule == 'edd':
-                    # TODO: change due_date
-                    due_dates = [0]
-                    action = earliest_due_date(candidates, mask, env, due_dates)
-                adj, fea, reward, done, candidates, mask = env.step(action.item())
-                rewards += reward
-
-                if done:
-                    break
-
-            make_spans[rule].append(rewards - env.posRewards)
-        avg_make_spans[rule] = sum(make_spans[rule]) / len(make_spans[rule])
-
-    return make_spans, avg_make_spans
-
-
-if __name__ == '__main__':
-
-    dataLoaded = np.load(
-        './DataGen/generatedData_' + str(configs.run_type) + '_' + str(configs.n_j) + '_' + str(
-            configs.n_m) + '_Seed' + str(configs.np_seed_validation) + '.npy')
-    vali_data = []
-    for i in range(dataLoaded.shape[0]):
-        vali_data.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2]))
-
-    results = baseline_performance(vali_data, configs.n_j, configs.n_m)  # [vali_data[0]]

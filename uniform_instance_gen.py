@@ -20,12 +20,11 @@ def uni_instance_gen(n_j, n_m, low, high, lt_low, lt_high, shuffle_machines):
     return times, lead_times, machines
 
 
-def generate_deadlines(times, lead_times, dt_low, dt_high):
+def generate_deadlines(times, lead_times, deadline_tightness):
     total_time = times + lead_times
     tpt = np.sum(total_time, axis=1)
-    deadline_tightness = np.random.uniform(low=dt_low, high=dt_high, size=tpt.shape[0])
-    deadlines = np.rint(tpt * deadline_tightness, dtype=np.int32)
-    return deadlines
+    deadlines = tpt * deadline_tightness
+    return np.rint(deadlines).astype(np.int32)
 
 
 def override(fn):
