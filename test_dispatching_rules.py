@@ -110,31 +110,32 @@ if __name__ == '__main__':
     n_m = 10
     run_type = 'L2D-LeadTime'
     np_seed_val = 200
+    compute_results = True
 
-    dataLoaded = np.load(
-        './DataGen/generatedData_' + str(run_type) + '_' + str(n_j) + '_' + str(
-            n_m) + '_Seed' + str(np_seed_val) + '.npy')
-    test_data = []
-    for i in range(dataLoaded.shape[0]):
-        test_data.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2]))
-    
-    experiment_c = test_dd_tightness(test_data, n_j, n_m)
-    best_c = min(experiment_c, key=experiment_c.get)  # select c with minimum difference to 0.5
+    if compute_results:
+        dataLoaded = np.load(
+            './DataGen/generatedData_' + str(run_type) + '_' + str(n_j) + '_' + str(
+                n_m) + '_Seed' + str(np_seed_val) + '.npy')
+        test_data = []
+        for i in range(dataLoaded.shape[0]):
+            test_data.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2]))
 
-    deadline_data = generate_deadline_data(test_data, best_c, n_j, n_m)
+        experiment_c = test_dd_tightness(test_data, n_j, n_m)
+        best_c = min(experiment_c, key=experiment_c.get)  # select c with minimum difference to 0.5
 
-    performance_per_env, avg_performance = baseline_performance(test_data, deadline_data, n_j, n_m)  # [vali_data[0]]
+        deadline_data = generate_deadline_data(test_data, best_c, n_j, n_m)
 
-    print(avg_performance)
+        performance_per_env, avg_performance = baseline_performance(test_data, deadline_data, n_j, n_m)  # [vali_data[0]]
 
-    # writing results to picke file, used for dictionary storage
-    with open('./dispatching_rule_results/' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
-              str(np_seed_val) +'.pkl', 'wb') as f:
-        pickle.dump(performance_per_env, f)
+        print(avg_performance)
 
-    # note: use this to load dictionary values
-    # with open('./dispatching_rule_results/' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
-    #           str(np_seed_val) + '.pkl', 'wb') as f:
-    #     loaded_dict = pickle.load(f)
+        # writing results to picke file, used for dictionary storage
+        with open('./dispatching_rule_results/' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
+                  str(np_seed_val) +'.pkl', 'wb') as f:
+            pickle.dump(performance_per_env, f)
+    else:
+        with open('./dispatching_rule_results/' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
+                  str(np_seed_val) + '.pkl', 'wb') as f:
+            loaded_dict = pickle.load(f)
 
     temp = 0
