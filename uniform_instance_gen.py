@@ -74,6 +74,25 @@ def uni_instance_gen(n_j, n_m, n_t, low, high, lt_low, lt_high, shuffle_machines
     return times, lead_times, machines, mask, truck_array
 
 
+def generate_deadlines(dur_flat, lt_flat, truck_array, action_matrix, deadline_tightness):
+    times = np.zeros_like(action_matrix)
+    lead_times = np.zeros_like(action_matrix)
+    times[np.nonzero(action_matrix)] = dur_flat
+    lead_times[np.nonzero(action_matrix)] = lt_flat
+
+    n_j = truck_array.shape[0]
+    n_t = times.shape[0] - n_j
+    total_time = times + lead_times
+    tpt = np.sum(total_time, axis=1)
+    load_dur_per_job = [tpt[n_j + truck_array[j]] for j in range(n_j)]
+    tpt[:n_j] += load_dur_per_job
+    max_tpt_per_truck = np.array([np.amax(tpt[j]) for t in range(n_t) for j in np.where(truck_array == t)])
+    truck_deadlines = max_tpt_per_truck * deadline_tightness
+    deadlines = np.concatenate((np.array([truck_deadlines[truck_array[j]] for j in range(n_j)]), truck_deadlines))
+    deadlines[:n_j] -= load_dur_per_job
+    return np.rint(deadlines).astype(np.int32)
+
+
 def override(fn):
     """
     override decorator
