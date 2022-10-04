@@ -163,7 +163,8 @@ def main():
     from uniform_instance_gen import uni_instance_gen
     data_generator = uni_instance_gen
 
-    dataLoaded = np.load('./DataGen/generatedDataConst' + str(configs.n_j) + '_' + str(configs.n_m) + '_Seed' + str(configs.np_seed_validation) + '.npy')
+    dataLoaded = np.load('./DataGen/generatedData' + '_' + str(configs.run_type) + '_' + str(configs.n_j) + '_' +
+                         str(configs.n_m) + '_Seed' + str(configs.np_seed_validation) + '.npy')
     vali_data = []
     for i in range(dataLoaded.shape[0]):
         vali_data.append((dataLoaded[i][0], dataLoaded[i][1]))
@@ -195,13 +196,8 @@ def main():
     # training loop
     log = []
     validation_log = []
-    optimal_gaps = []
-    optimal_gap = 1
     record = 100000
     for i_update in range(configs.max_updates):
-
-        t3 = time.time()
-
         ep_rewards = [0 for _ in range(configs.num_envs)]
         adj_envs = []
         fea_envs = []
@@ -209,7 +205,8 @@ def main():
         mask_envs = []
         
         for i, env in enumerate(envs):
-            adj, fea, candidate, mask = env.reset(data_generator(n_j=configs.n_j, n_m=configs.n_m, low=configs.low, high=configs.high))
+            adj, fea, candidate, mask = env.reset(data_generator(n_j=configs.n_j, n_m=configs.n_m, low=configs.low,
+                                                                 high=configs.high, shuffle_machines=configs.shuffle_machines))
             adj_envs.append(adj)
             fea_envs.append(fea)
             candidate_envs.append(candidate)
@@ -267,8 +264,8 @@ def main():
         mean_rewards_all_env = sum(ep_rewards) / len(ep_rewards)
         log.append([i_update, mean_rewards_all_env])
         if (i_update + 1) % 100 == 0:
-            file_writing_obj = open('./run_results/logs/' + 'log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_'
-                                    + str(configs.low) + '_' + str(configs.high) + '.txt', 'w')
+            file_writing_obj = open('./run_results/logs/' + str(configs.run_type) + '_log_' + str(configs.n_j) + '_'
+                                    + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high) + '.txt', 'w')
             file_writing_obj.write(str(log))
 
         # log results
@@ -276,23 +273,18 @@ def main():
             i_update + 1, mean_rewards_all_env, v_loss))
         
         # validate and save use mean performance
-        t4 = time.time()
         if (i_update + 1) % 100 == 0:
             vali_result = - validate(vali_data, ppo.policy).mean()
             validation_log.append(vali_result)
             if vali_result < record:
-                torch.save(ppo.policy.state_dict(), './SavedNetworkNew/{}.pth'.format(
+                torch.save(ppo.policy.state_dict(), './SavedNetworkNew/{}.pth'.format(str(configs.run_type) + '_' +
                     str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high)))
                 record = vali_result
             print('The validation quality is:', vali_result)
             file_writing_obj1 = open(
-                './run_results/valis/' + 'vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low)
+                './run_results/valis/' + str(configs.run_type) + '_vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low)
                 + '_' + str(configs.high) + '.txt', 'w')
             file_writing_obj1.write(str(validation_log))
-        t5 = time.time()
-
-        # print('Training:', t4 - t3)
-        # print('Validation:', t5 - t4)
 
 
 if __name__ == '__main__':
