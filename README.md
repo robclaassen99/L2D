@@ -22,6 +22,10 @@ If you make use of the code/experiment or L2D algorithm in your work, please cit
 ```
 
 ## Installation
+It is an absolute requirement to install the following versions of the required libraries, specifically for Pytorch. 
+If a newer version is used, it might not be possible to replicate results. Either install this version, or redo 
+hyperparameter tuning.
+
 Pytorch 1.6
 
 Gym 0.17.3
