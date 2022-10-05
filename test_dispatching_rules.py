@@ -108,7 +108,7 @@ def baseline_performance(data_set, deadline_data_set, n_j, n_m):
 
 
 if __name__ == '__main__':
-    n_j = 10
+    n_j = 30
     n_m = 10
     run_type = 'L2D-LeadTime'
     np_seed_val = 200
@@ -132,10 +132,12 @@ if __name__ == '__main__':
 
         experiment_c = test_dd_tightness(test_data, n_j, n_m)
         best_c = min(experiment_c, key=experiment_c.get)  # select c with minimum difference to 0.5
+        print(best_c)
+        print(f'({n_j} x {n_m})')
 
         deadline_data = generate_deadline_data(test_data, best_c, n_j, n_m)
 
-        performance_per_env, avg_performance = baseline_performance(test_data, deadline_data, n_j, n_m)  # [vali_data[0]]
+        performance_per_env, avg_performance = baseline_performance(test_data, deadline_data, n_j, n_m)
 
         print(avg_performance)
 
@@ -149,6 +151,7 @@ if __name__ == '__main__':
                       str(np_seed_val) + '.pkl', 'wb') as f:
                 pickle.dump(performance_per_env, f)
     else:
+        # loading already-conducted experiment results in dictionary
         if test_set:
             with open('./dispatching_rule_results/test_set_' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed'
                       + str(np_seed_test) + '.pkl', 'rb') as f:

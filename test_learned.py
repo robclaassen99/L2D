@@ -64,17 +64,17 @@ if __name__ == '__main__':
     device = torch.device(configs.device)
 
     parser = argparse.ArgumentParser(description='Arguments for ppo_jssp')
-    parser.add_argument('--Pn_j', type=int, default=6, help='Number of jobs of instances to test')
-    parser.add_argument('--Pn_m', type=int, default=6, help='Number of machines instances to test')
-    parser.add_argument('--Nn_j', type=int, default=6, help='Number of jobs on which to be loaded net are trained')
-    parser.add_argument('--Nn_m', type=int, default=6, help='Number of machines on which to be loaded net are trained')
+    parser.add_argument('--Pn_j', type=int, default=30, help='Number of jobs of instances to test')
+    parser.add_argument('--Pn_m', type=int, default=10, help='Number of machines instances to test')
+    parser.add_argument('--Nn_j', type=int, default=30, help='Number of jobs on which to be loaded net are trained')
+    parser.add_argument('--Nn_m', type=int, default=10, help='Number of machines on which to be loaded net are trained')
     parser.add_argument('--low', type=int, default=1, help='LB of duration')
     parser.add_argument('--high', type=int, default=99, help='UB of duration')
     parser.add_argument('--lt_low', type=int, default=1, help='LB of lead time')
     parser.add_argument('--lt_high', type=int, default=99, help='UB of lead time')
     parser.add_argument('--run_type', type=str, default="L2D-LeadTime", help='Problem instance type that we run')
     parser.add_argument('--shuffle_machines', type=bool, default=True, help='Toggle for permute_rows in machine matrix')
-    parser.add_argument('--test_set', type=bool, default=False,
+    parser.add_argument('--test_set', type=bool, default=True,
                         help='Toggle for running experiment on test set or validation set')
     parser.add_argument('--test_seed', type=int, default=100, help='Seed for test set generation')
     parser.add_argument('--seed', type=int, default=200, help='Seed for validate set generation')
@@ -135,6 +135,7 @@ if __name__ == '__main__':
 
     experiment_c = test_dd_tightness(dataset, N_JOBS_P, N_MACHINES_P)
     best_c = min(experiment_c, key=experiment_c.get)  # select c with minimum difference to 0.5
+    print(best_c)
 
     deadline_data = generate_deadline_data(dataset, best_c, N_JOBS_P, N_MACHINES_P)
 
