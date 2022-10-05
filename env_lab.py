@@ -4,34 +4,32 @@ from uniform_instance_gen import uni_instance_gen
 from Params import configs
 import time
 
-n_j = 3
-n_m = 3
-n_t = 2
+n_j = 5
+n_m = 5
+n_t = 3
 low = 1
-high = 50
+high = 99
 lt_low = 1
-lt_high = 50
-SEED = 11
+lt_high = 99
+shuffle_machines = True
+SEED = 100
 np.random.seed(SEED)
 env = SJSSP(n_j=n_j, n_m=n_m, n_t=n_t)
 
 
 # rollout env random action
 t1 = time.time()
-data = uni_instance_gen(n_j=n_j, n_m=n_m, n_t=n_t, low=low, high=high, lt_low=lt_low, lt_high=lt_high)
-dur = np.array([[83, 65,  3],
-               [69, 42, 64],
-               [27, 27, 18]])
-mch = np.array([[3, 2, 1],
-                [1, 2, 3],
-                [2, 1, 3]])
-# data = (dur, mch)
+data = uni_instance_gen(n_j=n_j, n_m=n_m, n_t=n_t, low=low, high=high, lt_low=lt_low, lt_high=lt_high,
+                        shuffle_machines=shuffle_machines)
+
 print('Dur')
 print(data[0])
 print('LT')
 print(data[1])
 print('Mach')
 print(data[2])
+print('Mask')
+print(data[3])
 print('Trucks')
 print(data[-1])
 print()
