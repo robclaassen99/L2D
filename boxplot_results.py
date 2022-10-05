@@ -24,13 +24,59 @@ def boxplot_makespan(results_rules, results_agent, rule_set, test, j, m):
     plt.show()
 
 
+def boxplot_diff_to_opt(results_rules, results_agent, opt_results, rule_set, test, j, m):
+    data = []
+    for rule in rule_set:
+        diff = np.array(results_rules[(rule, 'c_max')]) - opt_results
+        data.append(diff)
+    diff = np.array(results_agent['c_max']) - opt_results
+    data.append(diff)
+
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111)
+
+    ax.boxplot(data, notch=True, vert=False)
+    labels = rule_set + ['agent']
+    ax.set_yticklabels(labels)
+    plt.xlabel("Absolute difference with optimal makespan")
+    if test:
+        plt.title(f"Box plot of difference with optimal makespan on 1000 instances of size {j}x{m}")
+    else:
+        plt.title(f"Box plot of difference with optimal makespan on 100 instances of size {j}x{m}")
+    plt.show()
+
+
+def boxplot_gap_to_opt(results_rules, results_agent, opt_results, rule_set, test, j, m):
+    data = []
+    for rule in rule_set:
+        gap = (np.array(results_rules[(rule, 'c_max')]) - opt_results) / opt_results
+        data.append(gap)
+    gap = (np.array(results_agent['c_max']) - opt_results) / opt_results
+    data.append(gap)
+
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111)
+
+    ax.boxplot(data, notch=True, vert=False)
+    labels = rule_set + ['agent']
+    ax.set_yticklabels(labels)
+    plt.xlabel("Gap to optimal makespan")
+    if test:
+        plt.title(f"Box plot of gap to optimal makespan on 1000 instances of size {j}x{m}")
+    else:
+        plt.title(f"Box plot of gap to optimal makespan on 100 instances of size {j}x{m}")
+    plt.show()
+
+
 if __name__ == '__main__':
-    n_j = 15
-    n_m = 15
+    n_j = 10
+    n_m = 10
+    low = 1
+    high = 99
     run_type = 'L2D'
     np_seed_val = 200
     np_seed_test = 100
-    test_set = True
+    test_set = False
     rules = ['mor', 'mwr', 'edd', 'rand']
 
     if test_set:
@@ -41,15 +87,28 @@ if __name__ == '__main__':
         with open('./agent_results/test_set_' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
                   str(np_seed_test) + '.pkl', 'rb') as f:
             loaded_dict_agent = pickle.load(f)
-            print(loaded_dict_agent)
+            # print(loaded_dict_agent)
+        with open(f'./optimal_results/test_set_{run_type}_optimal_{n_j}_{n_m}_{low}_{high}.txt') as f:
+            lines = f.readline()
+            loaded_results = lines.strip('][').split(', ')
+            opt_results = np.array([float(res) for res in loaded_results])
+        print(np.sum(opt_results) / opt_results.shape[0])
+
     else:
         with open('./dispatching_rule_results/' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
                   str(np_seed_val) + '.pkl', 'rb') as f:
             loaded_dict_rules = pickle.load(f)
-            print(loaded_dict_rules)
+            # print(loaded_dict_rules)
         with open('./agent_results/' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
                   str(np_seed_val) + '.pkl', 'rb') as f:
             loaded_dict_agent = pickle.load(f)
-            print(loaded_dict_agent)
+            # print(loaded_dict_agent)
+
+        with open(f'./optimal_results/{run_type}_optimal_{n_j}_{n_m}_{low}_{high}.txt') as f:
+            lines = f.readline()
+            loaded_results = lines.strip('][').split(', ')
+            opt_results = np.array([float(res) for res in loaded_results])
 
     boxplot_makespan(loaded_dict_rules, loaded_dict_agent, rules, test_set, n_j, n_m)
+    boxplot_diff_to_opt(loaded_dict_rules, loaded_dict_agent, opt_results, rules, test_set, n_j, n_m)
+    boxplot_gap_to_opt(loaded_dict_rules, loaded_dict_agent, opt_results, rules, test_set, n_j, n_m)
