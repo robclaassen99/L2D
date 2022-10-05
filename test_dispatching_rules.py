@@ -113,7 +113,7 @@ if __name__ == '__main__':
     run_type = 'L2D'
     np_seed_val = 200
     np_seed_test = 100
-    compute_results = True
+    compute_results = False
     test_set = True
 
     if compute_results:
@@ -152,9 +152,9 @@ if __name__ == '__main__':
     else:
         if test_set:
             with open('./dispatching_rule_results/test_set_' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
-                      str(np_seed_test) + '.pkl', 'wb') as f:
+                      str(np_seed_test) + '.pkl', 'rb') as f:
                 loaded_dict = pickle.load(f)
         else:
             with open('./dispatching_rule_results/' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
-                      str(np_seed_val) + '.pkl', 'wb') as f:
+                      str(np_seed_val) + '.pkl', 'rb') as f:
                 loaded_dict = pickle.load(f)
