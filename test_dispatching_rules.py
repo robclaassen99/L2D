@@ -55,7 +55,9 @@ def baseline_performance(data_set, deadline_data_set, n_j, n_m):
     results_per_env = {}
     avg_results = {}
 
+    # possibly exclude lpt and spt for now, because they are never the best rule
     rule_set = ['rand', 'mtr', 'mor', 'mwr', 'lpt', 'spt', 'edd']
+    # rule_set = ['rand', 'mtr', 'mor', 'mwr', 'edd']  #
 
     # rollout episode using current model
     for rule in rule_set:
@@ -106,16 +108,24 @@ def baseline_performance(data_set, deadline_data_set, n_j, n_m):
 
 
 if __name__ == '__main__':
-    n_j = 30
+    n_j = 10
     n_m = 10
     run_type = 'L2D-LeadTime'
     np_seed_val = 200
+    np_seed_test = 100
     compute_results = True
+    test_set = True
 
     if compute_results:
-        dataLoaded = np.load(
-            './DataGen/generatedData_' + str(run_type) + '_' + str(n_j) + '_' + str(
-                n_m) + '_Seed' + str(np_seed_val) + '.npy')
+        if test_set:
+            dataLoaded = np.load(
+                './DataGen/Test/generatedTestData_' + str(run_type) + '_' + str(n_j) + '_' + str(
+                    n_m) + '_Seed' + str(np_seed_test) + '.npy')
+        else:
+            dataLoaded = np.load(
+                './DataGen/generatedData_' + str(run_type) + '_' + str(n_j) + '_' + str(
+                    n_m) + '_Seed' + str(np_seed_val) + '.npy')
+
         test_data = []
         for i in range(dataLoaded.shape[0]):
             test_data.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2]))
@@ -129,13 +139,22 @@ if __name__ == '__main__':
 
         print(avg_performance)
 
-        # writing results to picke file, used for dictionary storage
-        with open('./dispatching_rule_results/' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
-                  str(np_seed_val) +'.pkl', 'wb') as f:
-            pickle.dump(performance_per_env, f)
+        # writing results to pickle file, used for dictionary storage
+        if test_set:
+            with open('./dispatching_rule_results/test_set_' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed'
+                      + str(np_seed_test) + '.pkl', 'wb') as f:
+                pickle.dump(performance_per_env, f)
+        else:
+            with open('./dispatching_rule_results/' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
+                      str(np_seed_val) + '.pkl', 'wb') as f:
+                pickle.dump(performance_per_env, f)
     else:
-        with open('./dispatching_rule_results/' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
-                  str(np_seed_val) + '.pkl', 'wb') as f:
-            loaded_dict = pickle.load(f)
+        if test_set:
+            with open('./dispatching_rule_results/test_set_' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed'
+                      + str(np_seed_test) + '.pkl', 'rb') as f:
+                loaded_dict = pickle.load(f)
+        else:
+            with open('./dispatching_rule_results/' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
+                      str(np_seed_val) + '.pkl', 'rb') as f:
+                loaded_dict = pickle.load(f)
 
-    temp = 0

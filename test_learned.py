@@ -74,7 +74,9 @@ if __name__ == '__main__':
     parser.add_argument('--lt_high', type=int, default=99, help='UB of lead time')
     parser.add_argument('--run_type', type=str, default="L2D-LeadTime", help='Problem instance type that we run')
     parser.add_argument('--shuffle_machines', type=bool, default=True, help='Toggle for permute_rows in machine matrix')
-    parser.add_argument('--n_test', type=int, default=100, help='Number of instances to test the model on')
+    parser.add_argument('--test_set', type=bool, default=False,
+                        help='Toggle for running experiment on test set or validation set')
+    parser.add_argument('--test_seed', type=int, default=100, help='Seed for test set generation')
     parser.add_argument('--seed', type=int, default=200, help='Seed for validate set generation')
     params = parser.parse_args()
 
@@ -85,10 +87,11 @@ if __name__ == '__main__':
     LT_LOW = params.lt_low
     LT_HIGH = params.lt_high
     SHUFFLE_MACHINES = params.shuffle_machines
+    TEST_SET = params.test_set
     SEED = params.seed
+    TEST_SEED = params.test_seed
     N_JOBS_N = params.Nn_j
     N_MACHINES_N = params.Nn_m
-    N_TEST = params.n_test
 
     from JSSP_Env import SJSSP
     from PPO_jssp_multiInstances import PPO
@@ -119,8 +122,12 @@ if __name__ == '__main__':
 
     np.random.seed(SEED)
 
-    dataLoaded = np.load('./DataGen/generatedData_' + str(params.run_type) + '_' + str(N_JOBS_P) + '_'
-                         + str(N_MACHINES_P) + '_Seed' + str(SEED) + '.npy')
+    if TEST_SET:
+        dataLoaded = np.load('./DataGen/Test/generatedTestData_' + str(params.run_type) + '_' + str(N_JOBS_P) + '_' +
+                             str(N_MACHINES_P) + '_Seed' + str(TEST_SEED) + '.npy')
+    else:
+        dataLoaded = np.load('./DataGen/generatedData_' + str(params.run_type) + '_' + str(N_JOBS_P) + '_'
+                             + str(N_MACHINES_P) + '_Seed' + str(SEED) + '.npy')
     dataset = []
 
     for i in range(dataLoaded.shape[0]):
@@ -135,6 +142,11 @@ if __name__ == '__main__':
     performance_per_env, avg_performance = test(dataset, deadline_data)
 
     # writing results to picke file, used for dictionary storage
-    with open('./agent_results/' + str(params.run_type) + '_' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_Seed' +
-              str(SEED) + '.pkl', 'wb') as f:
-        pickle.dump(performance_per_env, f)
+    if TEST_SET:
+        with open('./agent_results/test_set_' + str(params.run_type) + '_' + str(N_JOBS_P) + '_' + str(
+                N_MACHINES_P) + '_Seed' + str(TEST_SEED) + '.pkl', 'wb') as f:
+            pickle.dump(performance_per_env, f)
+    else:
+        with open('./agent_results/' + str(params.run_type) + '_' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_Seed' +
+                  str(SEED) + '.pkl', 'wb') as f:
+            pickle.dump(performance_per_env, f)
