@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
+import seaborn as sns
 
 
 def boxplot_makespan(results_rules, results_agent, rule_set, test, j, m):
@@ -20,8 +21,13 @@ def boxplot_makespan(results_rules, results_agent, rule_set, test, j, m):
     if test:
         plt.title(f"Box plot of makespan on 1000 instances of size {j}x{m}")
     else:
-        plt.title(f"Box plot of makespan on 100 instances of size {j}x{m}")
-    plt.show()
+        plt.title(f"Box plot of makespan on instances of size {j}x{m}")
+
+    if save:
+        plt.savefig(
+            './experiment_plots/boxplot_makespan_{}_{}_{}_{}.png'.format(str(n_m), str(n_j), str(low), str(high)))
+    if show:
+        plt.show()
 
 
 def boxplot_diff_to_opt(results_rules, results_agent, opt_results, rule_set, test, j, m):
@@ -42,8 +48,12 @@ def boxplot_diff_to_opt(results_rules, results_agent, opt_results, rule_set, tes
     if test:
         plt.title(f"Box plot of difference with optimal makespan on 1000 instances of size {j}x{m}")
     else:
-        plt.title(f"Box plot of difference with optimal makespan on 100 instances of size {j}x{m}")
-    plt.show()
+        plt.title(f"Box plot of difference with optimal makespan on instances of size {j}x{m}")
+
+    if save:
+        plt.savefig('./experiment_plots/boxplot_diff_to_opt_{}_{}_{}_{}.png'.format(str(n_m), str(n_j), str(low), str(high)))
+    if show:
+        plt.show()
 
 
 def boxplot_gap_to_opt(results_rules, results_agent, opt_results, rule_set, test, j, m):
@@ -64,11 +74,18 @@ def boxplot_gap_to_opt(results_rules, results_agent, opt_results, rule_set, test
     if test:
         plt.title(f"Box plot of gap to optimal makespan on 1000 instances of size {j}x{m}")
     else:
-        plt.title(f"Box plot of gap to optimal makespan on 100 instances of size {j}x{m}")
-    plt.show()
+        plt.title(f"Box plot of gap to optimal makespan on instances of size {j}x{m}")
+
+    if save:
+        plt.savefig('./experiment_plots/boxplot_gap_to_opt_{}_{}_{}_{}.png'.format(str(n_m), str(n_j), str(low), str(high)))
+    if show:
+        plt.show()
 
 
 if __name__ == '__main__':
+    show = False
+    save = True
+
     n_j = 10
     n_m = 10
     low = 1
@@ -78,6 +95,12 @@ if __name__ == '__main__':
     np_seed_test = 100
     test_set = False
     rules = ['mor', 'mwr', 'edd', 'rand']
+
+    sns.set_style("darkgrid", {'axes.grid': True,
+                               'axes.edgecolor': 'black',
+                               'grid.color': '.6',
+                               'grid.linestyle': ':'
+                               })
 
     if test_set:
         with open('./dispatching_rule_results/test_set_' + str(run_type) + '_' + str(n_j) + '_' + str(n_m) + '_Seed' +
