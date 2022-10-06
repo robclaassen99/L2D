@@ -128,6 +128,7 @@ if __name__ == '__main__':
 
     experiment_c = test_dd_tightness(dataset, N_JOBS_P, N_MACHINES_P)
     best_c = min(experiment_c, key=experiment_c.get)  # select c with minimum difference to 0.5
+    print(best_c)
 
     deadline_data = generate_deadline_data(dataset, best_c, N_JOBS_P, N_MACHINES_P)
 
