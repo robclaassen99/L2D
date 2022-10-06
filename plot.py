@@ -18,14 +18,14 @@ def plot_log(input_data, n_j, n_m, smooth_factor, save, show):
     plt.clf()
     ax = fig.gca()
     data_smooth = pd.Series(data_list).rolling(smooth_factor, min_periods=1).mean()
-    sns.lineplot(data=data_list, ci=95, label='Raw return', alpha=0.2)
-    sns.lineplot(data=data_smooth, label='Smoothened return')
+    sns.lineplot(data=data_list, ci=95, label='Raw makespan', alpha=0.2)
+    sns.lineplot(data=data_smooth, label='Smoothened makespan')
     plt.xlim([-100, len(data_list) + 100])
     plt.ylim([data_smooth.min() - 5, data_smooth.max() + 5])
     plt.xlabel('Training Episodes', fontsize=12)
-    plt.ylabel('Average return', fontsize=12)
+    plt.ylabel('Makespan', fontsize=12)
     lgd = plt.legend(frameon=True, fancybox=True, prop={'weight': 'bold', 'size': 10}, loc="best")
-    plt.title(f'Average return during training ({n_j} x {n_m})', fontsize=13)
+    plt.title(f'Average makespan during training ({n_j} x {n_m})', fontsize=13)
     ax = plt.gca()
 
     plt.setp(ax.get_xticklabels(), fontsize=11)
@@ -50,13 +50,13 @@ def plot_val(input_data, n_j, n_m, save, show):
     fig = plt.figure()
     plt.clf()
     ax = fig.gca()
-    sns.lineplot(data=data_list, ci=95, label='Average return')
+    sns.lineplot(data=data_list, ci=95, label='Average makespan')
     plt.xlim([-5, len(data_list) + 5])
     plt.ylim([min(data_list) - 15, max(data_list) + 15])
     plt.xlabel('Validation checkpoint', fontsize=12)
-    plt.ylabel('Average return', fontsize=12)
+    plt.ylabel('Makespan', fontsize=12)
     lgd = plt.legend(frameon=True, fancybox=True, prop={'weight': 'bold', 'size': 10}, loc="best")
-    plt.title(f'Average return on validation set ({n_j} x {n_m})', fontsize=13)
+    plt.title(f'Average makespan on validation set ({n_j} x {n_m})', fontsize=13)
     ax = plt.gca()
 
     plt.setp(ax.get_xticklabels(), fontsize=11)
@@ -73,7 +73,7 @@ def plot_val(input_data, n_j, n_m, save, show):
 
 if __name__ == '__main__':
     # plot parameters
-    show = True
+    show = False
     save = True
     # problem params
     n_j = 15
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     h = 99
     smooth_factor = 200
     run_type = "L2D"
-    datatype = 'log'  # 'vali', 'log'
+    datatype = 'vali'  # 'vali', 'log'
 
     f = open('./run_results/{}s/{}_{}_{}_{}_{}_{}.txt'.format(datatype, run_type, datatype, n_j, n_m, l, h),
              'r').readline()
