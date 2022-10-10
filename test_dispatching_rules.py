@@ -8,8 +8,8 @@ def test_dd_tightness(data_set, n_j, n_m, n_t):
     env = SJSSP(n_j=n_j, n_m=n_m, n_t=n_t)
 
     tardiness_per_c = {}
-    tightness = 1.0
-    while tightness <= 2.0:
+    tightness = 2.0
+    while True:
         tightness = round(tightness, 1)
         total_num_jobs = 0
         total_tardy_jobs = 0

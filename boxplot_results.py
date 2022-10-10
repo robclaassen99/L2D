@@ -77,6 +77,7 @@ def boxplot_gap_to_opt(results_rules, results_agent, opt_results, rule_set, test
     ax.boxplot(data, notch=True, vert=False)
     labels = rule_set + ['agent']
     ax.set_yticklabels(labels)
+    ax.set_xlim(left=-0.05)
     plt.xlabel("Gap to optimal makespan")
     if test:
         plt.title(f"Box plot of gap to optimal makespan on 1000 instances of size {j}x{m}x{t}")
@@ -92,12 +93,12 @@ def boxplot_gap_to_opt(results_rules, results_agent, opt_results, rule_set, test
 
 
 if __name__ == '__main__':
-    show = True
+    show = False
     save = True
 
-    n_j = 10
+    n_j = 30
     n_m = 10
-    n_t = 5
+    n_t = 20
     low = 1
     high = 99
     lt_low = 1
