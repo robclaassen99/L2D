@@ -76,9 +76,9 @@ if __name__ == '__main__':
     parser.add_argument('--Pn_j', type=int, default=50, help='Number of jobs of instances to test')
     parser.add_argument('--Pn_m', type=int, default=10, help='Number of machines instances to test')
     parser.add_argument('--Pn_t', type=int, default=35, help='Number of trucks instances to test')
-    parser.add_argument('--Nn_j', type=int, default=30, help='Number of jobs on which to be loaded net are trained')
+    parser.add_argument('--Nn_j', type=int, default=20, help='Number of jobs on which to be loaded net are trained')
     parser.add_argument('--Nn_m', type=int, default=10, help='Number of machines on which to be loaded net are trained')
-    parser.add_argument('--Nn_t', type=int, default=20, help='Number of trucks on which to be loaded net are trained')
+    parser.add_argument('--Nn_t', type=int, default=15, help='Number of trucks on which to be loaded net are trained')
     parser.add_argument('--low', type=int, default=1, help='LB of duration')
     parser.add_argument('--high', type=int, default=99, help='UB of duration')
     parser.add_argument('--lt_low', type=int, default=1, help='LB of lead time')
@@ -139,9 +139,10 @@ if __name__ == '__main__':
     for i in range(dataLoaded.shape[0]):
         dataset.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2], dataLoaded[i][3], arrayLoaded[i]))
 
-    experiment_c = test_dd_tightness(dataset, N_JOBS_P, N_MACHINES_P, N_TRUCKS_P)
-    best_c = min(experiment_c, key=experiment_c.get)  # select c with minimum difference to 0.5
-    print(best_c)
+    # experiment_c = test_dd_tightness(dataset, N_JOBS_P, N_MACHINES_P, N_TRUCKS_P)
+    # best_c = min(experiment_c, key=experiment_c.get)  # select c with minimum difference to 0.5
+    # print(best_c)
+    best_c = 2.3
 
     deadline_data = generate_deadline_data(dataset, best_c, N_JOBS_P, N_MACHINES_P, N_TRUCKS_P)
 
