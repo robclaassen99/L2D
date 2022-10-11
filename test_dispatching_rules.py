@@ -8,9 +8,10 @@ def test_dd_tightness(data_set, n_j, n_m, n_t):
     env = SJSSP(n_j=n_j, n_m=n_m, n_t=n_t)
 
     tardiness_per_c = {}
-    tightness = 2.0
+    tightness = 5.0
     while True:
         tightness = round(tightness, 1)
+        print(tightness)
         total_num_jobs = 0
         total_tardy_jobs = 0
         for data in data_set:
@@ -36,6 +37,7 @@ def test_dd_tightness(data_set, n_j, n_m, n_t):
             total_tardy_jobs += np.sum(tardiness < 0).item()
 
         tardiness_per_c[tightness] = abs(0.5 - total_tardy_jobs / total_num_jobs)
+        print(total_tardy_jobs / total_num_jobs)
         tightness += 0.1
         if total_tardy_jobs / total_num_jobs < 0.5:
             break
@@ -119,9 +121,9 @@ def baseline_performance(data_set, deadline_data_set, n_j, n_m, n_t):
 
 
 if __name__ == '__main__':
-    n_j = 6
-    n_m = 6
-    n_t = 2
+    n_j = 200
+    n_m = 10
+    n_t = 150
     run_type = 'L2D-LeadTime_Loading_VRL'
     np_seed_val = 200
     compute_results = True
