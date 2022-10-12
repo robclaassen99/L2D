@@ -8,7 +8,7 @@ def test_dd_tightness(data_set, n_j, n_m, n_t):
     env = SJSSP(n_j=n_j, n_m=n_m, n_t=n_t)
 
     tardiness_per_c = {}
-    tightness = 5.0
+    tightness = 7.0
     while True:
         tightness = round(tightness, 1)
         print(tightness)
@@ -139,8 +139,9 @@ if __name__ == '__main__':
         for i in range(dataLoaded.shape[0]):
             test_data.append((dataLoaded[i][0], dataLoaded[i][1], dataLoaded[i][2], dataLoaded[i][3], arrayLoaded[i]))
 
-        experiment_c = test_dd_tightness(test_data, n_j, n_m, n_t)
-        best_c = min(experiment_c, key=experiment_c.get)  # select c with minimum difference to 0.5
+        # experiment_c = test_dd_tightness(test_data, n_j, n_m, n_t)
+        # best_c = min(experiment_c, key=experiment_c.get)  # select c with minimum difference to 0.5
+        best_c = 7.4
 
         deadline_data = generate_deadline_data(test_data, best_c, n_j, n_m, n_t)
 
