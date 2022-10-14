@@ -73,18 +73,18 @@ def plot_val(input_data, n_j, n_m, n_t, save, show):
 if __name__ == '__main__':
     # plot parameters
     show = True
-    save = True
+    save = False
     # problem params
-    n_j = 20
+    n_j = 30
     n_m = 10
-    n_t = 15
+    n_t = 20
     l = 1
     h = 99
     lt_l = 1
     lt_h = 99
     smooth_factor = 300
-    run_type = "L2D-LeadTime_Loading_VRL"
-    datatype = 'vali'  # 'vali', 'log'
+    run_type = "L2D-LeadTime_Loading_VRL_deepGNN"
+    datatype = 'log'  # 'vali', 'log'
 
     f = open('./run_results/{}s/{}_{}_{}_{}_{}_{}_{}_{}_{}.txt'.format(datatype, run_type, datatype, n_j, n_m, n_t, l,
                                                                        h, lt_l, lt_h),

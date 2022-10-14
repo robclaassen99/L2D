@@ -3,11 +3,11 @@ import argparse
 parser = argparse.ArgumentParser(description='Arguments for ppo_jssp')
 # args for device
 parser.add_argument('--device', type=str, default="cuda", help='Number of jobs of instances')
-parser.add_argument('--run_type', type=str, default="L2D-LeadTime_Loading_VRL", help='Problem instance type that we run')
+parser.add_argument('--run_type', type=str, default="L2D-LeadTime_Loading_VRL_deepPPO", help='Problem instance type that we run')
 # args for env
-parser.add_argument('--n_j', type=int, default=30, help='Number of jobs of instance')
+parser.add_argument('--n_j', type=int, default=20, help='Number of jobs of instance')
 parser.add_argument('--n_m', type=int, default=10, help='Number of machines instance')
-parser.add_argument('--n_t', type=int, default=20, help='Number of trucks of instance, i.e. number of loading operations')
+parser.add_argument('--n_t', type=int, default=15, help='Number of trucks of instance, i.e. number of loading operations')
 parser.add_argument('--rewardscale', type=float, default=0., help='Reward scale for positive rewards')
 parser.add_argument('--init_quality_flag', type=bool, default=False, help='Flag of whether init state quality is 0, True for 0')
 parser.add_argument('--low', type=int, default=1, help='LB of duration')
@@ -27,9 +27,9 @@ parser.add_argument('--graph_pool_type', type=str, default='average', help='grap
 parser.add_argument('--input_dim', type=int, default=2, help='number of dimension of raw node features')
 parser.add_argument('--hidden_dim', type=int, default=64, help='hidden dim of MLP in fea extract GNN')
 parser.add_argument('--num_mlp_layers_feature_extract', type=int, default=2, help='No. of layers of MLP in fea extract GNN')
-parser.add_argument('--num_mlp_layers_actor', type=int, default=2, help='No. of layers in actor MLP')
+parser.add_argument('--num_mlp_layers_actor', type=int, default=3, help='No. of layers in actor MLP')
 parser.add_argument('--hidden_dim_actor', type=int, default=32, help='hidden dim of MLP in actor')
-parser.add_argument('--num_mlp_layers_critic', type=int, default=2, help='No. of layers in critic MLP')
+parser.add_argument('--num_mlp_layers_critic', type=int, default=3, help='No. of layers in critic MLP')
 parser.add_argument('--hidden_dim_critic', type=int, default=32, help='hidden dim of MLP in critic')
 # args for PPO
 parser.add_argument('--num_envs', type=int, default=4, help='No. of envs for training')
