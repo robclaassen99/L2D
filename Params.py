@@ -3,11 +3,11 @@ import argparse
 parser = argparse.ArgumentParser(description='Arguments for ppo_jssp')
 # args for device
 parser.add_argument('--device', type=str, default="cuda", help='Number of jobs of instances')
-parser.add_argument('--run_type', type=str, default="L2D-LeadTime_Loading_VRL_deepPPO", help='Problem instance type that we run')
+parser.add_argument('--run_type', type=str, default="L2D-LeadTime_Loading_VRL_moreGNN", help='Problem instance type that we run')
 # args for env
-parser.add_argument('--n_j', type=int, default=30, help='Number of jobs of instance')
+parser.add_argument('--n_j', type=int, default=20, help='Number of jobs of instance')
 parser.add_argument('--n_m', type=int, default=10, help='Number of machines instance')
-parser.add_argument('--n_t', type=int, default=20, help='Number of trucks of instance, i.e. number of loading operations')
+parser.add_argument('--n_t', type=int, default=15, help='Number of trucks of instance, i.e. number of loading operations')
 parser.add_argument('--rewardscale', type=float, default=0., help='Reward scale for positive rewards')
 parser.add_argument('--init_quality_flag', type=bool, default=False, help='Flag of whether init state quality is 0, True for 0')
 parser.add_argument('--low', type=int, default=1, help='LB of duration')
@@ -21,13 +21,14 @@ parser.add_argument('--torch_seed', type=int, default=600, help='Seed for torch'
 parser.add_argument('--et_normalize_coef', type=int, default=1000, help='Normalizing constant for feature LBs (end time), normalization way: fea/constant')
 parser.add_argument('--wkr_normalize_coef', type=int, default=100, help='Normalizing constant for wkr, normalization way: fea/constant')
 # args for network
-parser.add_argument('--num_layers', type=int, default=3, help='No. of layers of feature extraction GNN including input layer')
+# Note: alter this for deeper agent experiments
+parser.add_argument('--num_layers', type=int, default=4, help='No. of layers of feature extraction GNN including input layer')
 parser.add_argument('--neighbor_pooling_type', type=str, default='sum', help='neighbour pooling type')
 parser.add_argument('--graph_pool_type', type=str, default='average', help='graph pooling type')
 parser.add_argument('--input_dim', type=int, default=2, help='number of dimension of raw node features')
 parser.add_argument('--hidden_dim', type=int, default=64, help='hidden dim of MLP in fea extract GNN')
 # NOTE: when conducting deeper agent experiments, the number of layers have have to be set correctly before loading learned parameters!
-parser.add_argument('--num_mlp_layers_feature_extract', type=int, default=3, help='No. of layers of MLP in fea extract GNN')
+parser.add_argument('--num_mlp_layers_feature_extract', type=int, default=2, help='No. of layers of MLP in fea extract GNN')
 parser.add_argument('--num_mlp_layers_actor', type=int, default=2, help='No. of layers in actor MLP')
 parser.add_argument('--hidden_dim_actor', type=int, default=32, help='hidden dim of MLP in actor')
 parser.add_argument('--num_mlp_layers_critic', type=int, default=2, help='No. of layers in critic MLP')

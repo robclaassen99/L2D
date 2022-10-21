@@ -75,15 +75,15 @@ if __name__ == '__main__':
     show = True
     save = False
     # problem params
-    n_j = 20
+    n_j = 30
     n_m = 10
-    n_t = 15
+    n_t = 20
     l = 1
     h = 99
     lt_l = 1
     lt_h = 99
     smooth_factor = 300
-    run_type = "L2D-LeadTime_Loading_VRL_deepPPO"
+    run_type = "L2D-LeadTime_Loading_VRL_moreGNN"
     datatype = 'vali'  # 'vali', 'log'
 
     f = open('./run_results/{}s/{}_{}_{}_{}_{}_{}_{}_{}_{}.txt'.format(datatype, run_type, datatype, n_j, n_m, n_t, l,
